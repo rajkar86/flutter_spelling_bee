@@ -1,4 +1,4 @@
-package com.example.spelling_bee;
+package com.kraj.spelling.bee;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
