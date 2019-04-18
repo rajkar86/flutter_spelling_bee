@@ -1,33 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:spelling_bee/blocs/game_bloc.dart';
+import 'package:spelling_bee/states/provider.dart';
 
 class Actions extends StatelessWidget {
-  const Actions({Key key, this.clear, this.refresh, this.submit})
+  const Actions({Key key})
       : super(key: key);
 
-  final VoidCallback clear;
-  final VoidCallback refresh;
-  final VoidCallback submit;
+  // final VoidCallback clear;
+  // final VoidCallback refresh;
+  // final VoidCallback submit;
 
   static const double SIZE=36;
 
   @override
   Widget build(BuildContext context) {
-    return Ink(
-      // padding: const EdgeInsets.only(bottom: SIZE*1.5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          _icon(Icons.clear, "Clear", this.clear),
-          _icon(Icons.refresh, "Shuffle", this.refresh),
-          _icon(Icons.check, "Check", this.submit),
-          //button("Clear", this.clear),
-          // button("Submit", this.submit),
-        ],
-      ),
-    );
-  }
-
-  Widget _icon(IconData i, String t, VoidCallback c) {
+    Widget _icon(IconData i, String t, Event e) {
     return Column(
       children: <Widget>[
         IconButton(
@@ -36,13 +23,27 @@ class Actions extends StatelessWidget {
           tooltip: t,
           // color: Colors.yellow,
           splashColor: Colors.yellow,
-          onPressed: c,
+          onPressed: () => Provider.of(context).game.eventSink.add(e),
           disabledColor: Colors.blueGrey,
         ),
         Text(t)
       ],
     );
   }
+    return Ink(
+      // padding: const EdgeInsets.only(bottom: SIZE*1.5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          _icon(Icons.clear, "Clear", Event.CLEAR),
+          _icon(Icons.refresh, "Shuffle", Event.SHUFFLE),
+          _icon(Icons.check, "Check", Event.CHECK),
+        ],
+      ),
+    );
+  }
+
+  
 
   // Widget button(String s, VoidCallback c) {
   //   return Padding(

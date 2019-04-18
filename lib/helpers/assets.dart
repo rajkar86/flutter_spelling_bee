@@ -14,22 +14,7 @@ class Assets {
     return json.decode(jsonString);
   }
 
-  // static Future<bool> setGame(String game) async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   return prefs.setString("game", game);
-  // }
-
-  // static Future<String> getGame() async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   return prefs.getString("game") ?? "";
-  // }
-
-  // static Future<bool> removeGame() async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   return prefs.remove("game");
-  // }
-
-    static Future<bool> setGame(List<String> list) async {
+  static Future<bool> setGame(List<String> list) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.setStringList("game", list);
   }

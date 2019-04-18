@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/pages/main_menu.dart';
 // import 'package:spelling_bee/pages/game.dart';
-import 'package:spelling_bee/states/answer.dart';
+import 'package:spelling_bee/states/provider.dart';
 
 // import 'package:flutter/rendering.dart';
-
 
 
 void main() async {
@@ -28,8 +28,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var title = 'Spelling Bee';
-    return Answer(
-      wordMap: this.wordMap,
+    return Provider(
+      game: GameBloc(this.wordMap),
       // statsMap: this.statsMap,
       child: MaterialApp(
         title: title,

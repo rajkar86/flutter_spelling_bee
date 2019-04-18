@@ -23,11 +23,11 @@ class Logic {
         : "Not a word";
   }
 
-  static bool isValidAnswer(String word, String letters) {
+  static bool isValidProvider(String word, String letters) {
     return (word.length >= 4) && (word.contains(letters[0]));
   }
 
-  static bool isCorrectAnswer(String checkStatus) {
+  static bool isCorrectProvider(String checkStatus) {
     return checkStatus == "";
   }
 
@@ -70,7 +70,10 @@ class Logic {
     return word.length + (isPangram(word, game) ? 7 : 0);
   }
 
-  static List answer(Map wordMap, String game) {
+  static List<String> answer(Map wordMap, String game) {
+    if (game==null)
+      return [];
+
     var sub = Subsets(game.substring(1).split(""))();
 
     var ans = [];
@@ -80,13 +83,11 @@ class Logic {
       var key = sortWord(g.join());
       var val = wordMap[key];
       if (val != null) ans.addAll(val);
-      // return (val == null) ? [] : val;
-      // return 1;
     }
 
     sub.forEach((g) => {solveSubGame(g)});
 
-    return ans;
+    return List<String>.from(ans);
   }
 
   static int pointsForAns(List ans, String game) {

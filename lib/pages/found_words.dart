@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'package:spelling_bee/helpers/ui.dart';
+import 'package:spelling_bee/states/provider.dart';
 
 class FoundWords extends StatelessWidget {
-  const FoundWords({Key key, @required this.words}) : super(key: key);
+  const FoundWords({Key key}) : super(key: key);
 
-  final List<String> words;
+  // final List<String> words;
 
   Widget _word(w) {
     return Card(
@@ -21,6 +22,19 @@ class FoundWords extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<List<String>>(
+      stream: Provider.of(context).game.foundWords ,
+      initialData: [] ,
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        return Container(
+          child: _build(context, snapshot.data),
+        );
+      },
+    );
+  }
+
+  Widget _build(BuildContext context, List<String> words) {
+
     return Column(
       children: <Widget>[
         buildSwipeMessage("Swipe right to go back to the game."),
@@ -36,7 +50,7 @@ class FoundWords extends StatelessWidget {
         ),
         Expanded(
             child:
-                ListView(children: this.words.map((w) => _word(w)).toList())),
+                ListView(children: words.map((w) => _word(w)).toList())),
       ],
     );
   }

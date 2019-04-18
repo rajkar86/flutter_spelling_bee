@@ -26,6 +26,7 @@ dependencies:
   page_transition: ^1.0.9
   trotter: ^0.9.1
   shared_preferences: ^0.5.2
+  rxdart : ^0.21.0
 
 
 dev_dependencies:
