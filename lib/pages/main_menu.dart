@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'package:spelling_bee/helpers/ui.dart';
 // import 'package:spelling_bee/helpers/logic.dart';
-// import 'package:spelling_bee/states/provider.dart';
+// import 'package:spelling_bee/helpers/provider.dart';
 import 'package:spelling_bee/pages/game.dart';
 import 'package:spelling_bee/pages/rules.dart';
 // import 'package:spelling_bee/helpers/assets.dart';
-import 'package:spelling_bee/states/provider.dart';
+import 'package:spelling_bee/helpers/provider.dart';
 
 class MainMenu extends StatelessWidget {
   // final Widget child;
@@ -26,7 +26,6 @@ class MainMenu extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, bool isGameSaved) {
-
     void push(w, [bool resume]) {
       if (resume != null) {
         Provider.of(context).game.loadGameSink.add(resume);

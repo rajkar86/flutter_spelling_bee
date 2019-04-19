@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'dart:math';
 
-import 'package:spelling_bee/states/provider.dart';
+import 'package:spelling_bee/helpers/provider.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 
 class CurrentWord extends StatelessWidget {

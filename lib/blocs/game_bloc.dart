@@ -5,20 +5,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/logic.dart';
 
-class _SavedGame {
-  final List<String> _val;
-
-  _SavedGame() : this._val = [];
-
-  _SavedGame.fromCache(List<String> val) : this._val = val;
-
-  String game() => (_val.length > 0) ? _val[0] : null;
-
-  List<String> foundWords() => (_val.length > 1) ? _val.sublist(1) : [];
-
-  List<String> val() => _val;
-}
-
 enum Event { DELETE, CHECK, SHUFFLE, CLEAR }
 
 class Message {
@@ -27,74 +13,133 @@ class Message {
   Message(this.message, [this.error = false]);
 }
 
+class _GameStore {
+  final List<String> _val;
+
+  _GameStore() : this._val = [];
+
+  _GameStore.fromCache(List<String> val) : this._val = val;
+
+  String game() => (_val.length > 0) ? _val[0] : null;
+
+  List<String> foundWords() => (_val.length > 1) ? _val.sublist(1) : [];
+
+  List<String> val() => _val;
+}
+
 class _Game {
-  String game;
-  List<String> answer;
-  String word = "";
-  SplayTreeSet<String> words = SplayTreeSet<String>();
-  Sink<String> wordSink;
-  Sink<List<String>> foundWordsSink;
-  Sink<Message> messageSink;
+  BehaviorSubject<String> game = BehaviorSubject<String>.seeded("");
 
-  _Game(Map wordMap, this.wordSink, this.foundWordsSink, this.messageSink,
-      String game,
-      [List<String> foundWords = const []])
-      : this.game = game,
-        this.answer = Logic.answer(wordMap, game);
+  BehaviorSubject<List<String>> answer =
+      BehaviorSubject<List<String>>.seeded([]);
 
-  int maxWords() => this.answer.length;
-  int maxPoints() => Logic.pointsForAns(this.answer, this.game);
+  BehaviorSubject<String> word = BehaviorSubject<String>.seeded("");
 
-  setWord(String w) => {word = w, wordSink.add(w)};
+  BehaviorSubject<SplayTreeSet<String>> words =
+      BehaviorSubject<SplayTreeSet<String>>.seeded(SplayTreeSet<String>());
+
+  BehaviorSubject<Message> message =
+      BehaviorSubject<Message>.seeded(Message(""));
+
+  BehaviorSubject<int> points = BehaviorSubject<int>.seeded(0);
+
+  // Sink<Message> messageSink;
+  //Logic.answer(wordMap, game)
+
+  void reset(String game, List<String> answer, [List<String> words = const []]) {
+    this.game.add(game);
+    this.answer.add(answer);
+    this.word.add("");
+    this.words.add(SplayTreeSet<String>.from(words));
+    this.message.add(Message(""));
+    this.points.add(Logic.pointsForAns(words, game));
+  }
+
+  int get maxWords => this.answer.value.length;
+  int get maxPoints => Logic.pointsForAns(this.answer.value, this.game.value);
+  _setWord(String w) => {word.add(w)};
 
   bool addLetter(String l) {
-    if (word.length > Logic.MAX_WORD_LENGTH) {
+    if (word.value.length > Logic.MAX_WORD_LENGTH) {
       return false;
     }
-    setWord(word + l);
+    _setWord(word.value + l);
     return true;
   }
 
   void delete() {
-    if (word.length >= 1) {
-      word = word.substring(0, word.length - 1);
-      wordSink.add(word);
-    }
+    if (word.value.length >= 1)
+      _setWord(word.value.substring(0, word.value.length - 1));
   }
 
-  void clear() => setWord("");
+  void clear() => _setWord("");
 
-  void check(Map wordMap) {
-    String status = Logic.check(word, game, words, wordMap);
+  void _setTempMessage(m) {
+    message.add(m);
+    //TODO take this logic out of the bloc
+    Timer(Duration(milliseconds: 500), () => message.add(Message("")));
+  }
 
+  bool check(Map wordMap) {
+    String status = Logic.check(word.value, game.value, words.value, wordMap);
     bool res = Logic.isCorrectProvider(status);
     if (res) {
-      messageSink.add(Message(Logic.sampleSuccessMessage(), false));
-      words.add(word);
-      foundWordsSink.add(words.toList());
-      wordSink.add("");
-      // points += Logic.points(word, game);
+      var l = words.value;
+      l.add(word.value);
+      words.add(l);
+      print("points");
+      print(points.value + Logic.points(word.value, game.value));
+      points.sink.add(points.value + Logic.points(word.value, game.value));
     }
-    messageSink.add(Message(status, true));
-    setWord("");
+    _setTempMessage(Message(res ? Logic.sampleSuccessMessage() : status, !res));
+    _setWord("");
+    return res;
   }
 
   void shuffle() {
-    game = Logic.shuffleGame(game);
+    game.add(Logic.shuffleGame(game.value));
+  }
+
+  _GameStore getGameStore() {
+    var l = words.value.toList();
+    l.insert(0, game.value);
+    return _GameStore.fromCache(l);
+  }
+
+  void dispose() {
+    game.close();
+    word.close();
+    points.close();
+    answer.close();
+    words.close();
+    message.close();
   }
 }
 
 class GameBloc {
   final Map wordMap;
+  var _gameState = _Game();
 
-  final _event = PublishSubject<Event>();
-  Sink<Event> get eventSink => _event.sink;
+  // STREAMS
+  Stream<SplayTreeSet<String>> get foundWords => _gameState.words.stream;
+  Stream<String> get word => _gameState.word.stream;
+  Stream<String> get game => _gameState.game.stream;
+  Stream<Message> get message => _gameState.message.stream;
+  Stream<List<String>> get answer => _gameState.answer.stream;
+
+  Stream<int> get points => _gameState.points.stream;
+  Stream<int> get wordCount => _gameState.words.map((x) => x.length);
+
+  int get maxPoints => _gameState.maxPoints;
+  int get maxWords => _gameState.maxWords;
+
 
   final _isGameSaved = BehaviorSubject<bool>.seeded(false);
   Stream<bool> get isGameSaved => _isGameSaved.stream;
 
-  final _saveGame = PublishSubject<bool>();
-  Sink<bool> get saveGameSink => _saveGame.sink;
+  // SINKS
+  final _event = PublishSubject<Event>();
+  Sink<Event> get eventSink => _event.sink;
 
   final _loadGame = PublishSubject<bool>();
   Sink<bool> get loadGameSink => _loadGame.sink;
@@ -102,57 +147,40 @@ class GameBloc {
   final _nextLetter = PublishSubject<String>();
   Sink<String> get nextLetterSink => _nextLetter.sink;
 
-  final _foundWords = BehaviorSubject<List<String>>.seeded([]);
-  Stream<List<String>> get foundWords => _foundWords.stream;
-  // Sink<List<String>> get foundWordsSink => _foundWords.sink;
-
-  final _word = BehaviorSubject<String>.seeded("");
-  Stream<String> get word => _word.stream;
-  Sink<String> get wordSink => _word.sink;
-
-  final _game = BehaviorSubject<String>();
-  Stream<String> get game => _game.stream;
-  // Sink<String> get gameSink => _game.sink;
-
-  final _message = BehaviorSubject<Message>();
-  Stream<Message> get message => _message.stream;
-
-  _SavedGame _savedGame;
-  _Game _gameState;
-
-  // Sink<String> get wordCheck => _wordCheck.sink;
+  _GameStore _savedGame;
 
   GameBloc(this.wordMap) {
-    _load();
-    _saveGame.stream.listen(_saveGameHandler);
-    _loadGame.stream.listen(_loadGameHandler);
+    _init();
+    _loadGame.listen(_loadGameHandler);
+    _nextLetter.listen(_gameState.addLetter);
+    _event.listen(_eventHandler);
+    wordCount.listen(print);
   }
 
-  void _saveGameHandler(bool save) {
+  void _saveGame(bool save) {
+    _savedGame = save ? _gameState.getGameStore() : null;
     save ? Assets.setGame(_savedGame.val()) : Assets.removeGame();
-    _savedGame = save ? _savedGame : _SavedGame();
+    _isGameSaved.add(save);
   }
 
-  Future<void> _load() async {
-    _savedGame = _SavedGame.fromCache(await Assets.getGame());
+  Future<void> _init() async {
+    _savedGame = _GameStore.fromCache(await Assets.getGame());
+    _isGameSaved.add(_savedGame.val().length > 0);
   }
 
   void _loadGameHandler(bool resume) {
-    print("Loading");
     String game = resume ? _savedGame.game() : Logic.randomGame(wordMap);
     List<String> foundWords = resume ? _savedGame.foundWords() : List<String>();
-    _gameState = _Game(
-        wordMap, _word.sink, _foundWords.sink, _message.sink, game, foundWords);
-    _game.sink.add(game);
-    _nextLetter.stream.listen(_gameState.addLetter);
-    _event.stream.listen(_eventHandler);
+    var answer = Logic.answer(wordMap, game);
+    _gameState.reset(game, answer, foundWords);
+    if (!resume) _saveGame(true);
   }
 
   void _eventHandler(Event e) {
     switch (e) {
       case Event.CHECK:
         {
-          _gameState.check(wordMap);
+          if (_gameState.check(wordMap)) _saveGame(true);
         }
         break;
 
@@ -180,17 +208,11 @@ class GameBloc {
     }
   }
 
-  void close() {
-    // _savedGame.close();
-    _foundWords.close();
-    _word.close();
-    _saveGame.close();
-    _loadGame.close();
+  void dispose() {
+    _gameState.dispose();
     _isGameSaved.close();
+    _loadGame.close();
     _nextLetter.close();
     _event.close();
-    _game.close();
-    _message.close();
-    // _wordCheck.close();
   }
 }

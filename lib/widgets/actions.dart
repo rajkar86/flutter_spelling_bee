@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
-import 'package:spelling_bee/states/provider.dart';
+import 'package:spelling_bee/helpers/provider.dart';
 
 class Actions extends StatelessWidget {
   const Actions({Key key})
@@ -17,16 +17,18 @@ class Actions extends StatelessWidget {
     Widget _icon(IconData i, String t, Event e) {
     return Column(
       children: <Widget>[
-        IconButton(
-          iconSize: SIZE,
-          icon: Icon(i, color: Colors.black, size: SIZE),
-          tooltip: t,
+        FlatButton(
+          // iconSize: SIZE,
+          child: Column(
+            children: <Widget>[Icon(i, color: Colors.black, size: SIZE),Text(t)],
+          ),
+          // label: Text(t),
           // color: Colors.yellow,
-          splashColor: Colors.yellow,
+          color: Colors.transparent,
+          splashColor: Colors.grey,
           onPressed: () => Provider.of(context).game.eventSink.add(e),
-          disabledColor: Colors.blueGrey,
+          // disabledColor: Colors.blueGrey,
         ),
-        Text(t)
       ],
     );
   }

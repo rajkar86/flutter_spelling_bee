@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 
 class Provider extends InheritedWidget {
@@ -14,5 +14,6 @@ class Provider extends InheritedWidget {
       context.inheritFromWidgetOfExactType(Provider) as Provider;
 
   @override
+  // bool updateShouldNotify(Provider oldWidget) => oldWidget != this;
   bool updateShouldNotify(Provider oldWidget) => true;
 }

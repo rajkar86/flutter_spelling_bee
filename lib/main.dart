@@ -5,7 +5,7 @@ import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/pages/main_menu.dart';
 // import 'package:spelling_bee/pages/game.dart';
-import 'package:spelling_bee/states/provider.dart';
+import 'package:spelling_bee/helpers/provider.dart';
 
 // import 'package:flutter/rendering.dart';
 

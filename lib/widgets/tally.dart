@@ -26,6 +26,7 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
   @override
   Widget build(BuildContext context) {
     var points = _points.evaluate(animation);
+    print(points);
     var width = 3;
     return Column(
       children: <Widget>[

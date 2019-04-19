@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spelling_bee/states/provider.dart';
+import 'package:spelling_bee/helpers/provider.dart';
 
 class LetterCollection extends StatelessWidget {
   // LetterCollection({Key key}) : super(key: key);
@@ -18,7 +18,6 @@ class LetterCollection extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, String letters) {
-    print(letters);
     Widget _button(String c, [bool center = false]) {
       double sz = 50;
 
