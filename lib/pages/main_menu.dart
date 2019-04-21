@@ -30,7 +30,7 @@ class MainMenu extends StatelessWidget {
       if (resume != null) {
         Provider.of(context).game.loadGameSink.add(resume);
       }
-      Navigator.push(context, buildPageTransition(scaffold(w)));
+      Navigator.push(context, buildPageTransition(scaffold(w, context, false)));
     }
 
     void rules() => push(Rules());

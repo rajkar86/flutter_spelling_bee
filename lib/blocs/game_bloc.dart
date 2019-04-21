@@ -5,7 +5,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/logic.dart';
 
-enum Event { DELETE, CHECK, SHUFFLE, CLEAR }
+enum Event { LOAD, DELETE, CHECK, SHUFFLE, CLEAR }
 
 class Message {
   final String message;
@@ -28,35 +28,43 @@ class _GameStore {
 }
 
 class _Game {
-  BehaviorSubject<String> game = BehaviorSubject<String>.seeded("");
+  BehaviorSubject<String> game = BehaviorSubject<String>();
 
-  BehaviorSubject<List<String>> answer =
-      BehaviorSubject<List<String>>.seeded([]);
+  // BehaviorSubject<List<String>> answer = BehaviorSubject<List<String>>();
 
-  BehaviorSubject<String> word = BehaviorSubject<String>.seeded("");
+  BehaviorSubject<String> word = BehaviorSubject<String>();
 
   BehaviorSubject<SplayTreeSet<String>> words =
-      BehaviorSubject<SplayTreeSet<String>>.seeded(SplayTreeSet<String>());
+      BehaviorSubject<SplayTreeSet<String>>();
+
+  BehaviorSubject<SplayTreeSet<String>> wordsRemaining =
+      BehaviorSubject<SplayTreeSet<String>>();
 
   BehaviorSubject<Message> message =
       BehaviorSubject<Message>.seeded(Message(""));
 
-  BehaviorSubject<int> points = BehaviorSubject<int>.seeded(0);
+  BehaviorSubject<int> points = BehaviorSubject<int>();
+
+  int maxWords=0, maxPoints=0;
 
   // Sink<Message> messageSink;
   //Logic.answer(wordMap, game)
 
-  void reset(String game, List<String> answer, [List<String> words = const []]) {
+  void reset(String game, List<String> answer,
+      [List<String> wordList = const []]) {
+    
+    var words = SplayTreeSet<String>.from(wordList);
+    var wordsRemaining = SplayTreeSet<String>.from(answer).difference(words);
     this.game.add(game);
-    this.answer.add(answer);
+    this.wordsRemaining.add(wordsRemaining);
     this.word.add("");
-    this.words.add(SplayTreeSet<String>.from(words));
-    this.message.add(Message(""));
-    this.points.add(Logic.pointsForAns(words, game));
+    this.words.add(words);
+    // this.message.add(Message(""));
+    this.points.add(Logic.pointsForAns(wordList, game));
+    maxWords = answer.length;
+    maxPoints = Logic.pointsForAns(answer, game);
   }
 
-  int get maxWords => this.answer.value.length;
-  int get maxPoints => Logic.pointsForAns(this.answer.value, this.game.value);
   _setWord(String w) => {word.add(w)};
 
   bool addLetter(String l) {
@@ -87,6 +95,9 @@ class _Game {
       var l = words.value;
       l.add(word.value);
       words.add(l);
+      l = wordsRemaining.value;
+      l.remove(word.value);
+      wordsRemaining.add(l);
       points.sink.add(points.value + Logic.points(word.value, game.value));
     }
     _setTempMessage(Message(res ? Logic.sampleSuccessMessage() : status, !res));
@@ -108,7 +119,7 @@ class _Game {
     game.close();
     word.close();
     points.close();
-    answer.close();
+    wordsRemaining.close();
     words.close();
     message.close();
   }
@@ -120,17 +131,17 @@ class GameBloc {
 
   // STREAMS
   Stream<SplayTreeSet<String>> get foundWords => _gameState.words.stream;
+  Stream<SplayTreeSet<String>> get wordsRemaining => _gameState.wordsRemaining.stream;
   Stream<String> get word => _gameState.word.stream;
   Stream<String> get game => _gameState.game.stream;
   Stream<Message> get message => _gameState.message.stream;
-  Stream<List<String>> get answer => _gameState.answer.stream;
+  // Stream<List<String>> get answer => _gameState.answer.stream;
 
   Stream<int> get points => _gameState.points.stream;
   Stream<int> get wordCount => _gameState.words.map((x) => x.length);
 
   int get maxPoints => _gameState.maxPoints;
   int get maxWords => _gameState.maxWords;
-
 
   final _isGameSaved = BehaviorSubject<bool>.seeded(false);
   Stream<bool> get isGameSaved => _isGameSaved.stream;
@@ -163,7 +174,9 @@ class GameBloc {
 
   Future<void> _init() async {
     _savedGame = _GameStore.fromCache(await Assets.getGame());
-    _isGameSaved.add(_savedGame.val().length > 0);
+    var isGameSaved = _savedGame.val().length > 0;
+    _isGameSaved.add(isGameSaved);
+    _loadGameHandler(isGameSaved);
   }
 
   void _loadGameHandler(bool resume) {
@@ -176,6 +189,11 @@ class GameBloc {
 
   void _eventHandler(Event e) {
     switch (e) {
+      case Event.LOAD:
+        {
+          _loadGameHandler(false);
+        }
+        break;
       case Event.CHECK:
         {
           if (_gameState.check(wordMap)) _saveGame(true);

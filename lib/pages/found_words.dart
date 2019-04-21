@@ -4,30 +4,19 @@ import 'package:flutter/material.dart';
 
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/helpers/provider.dart';
+import 'package:spelling_bee/widgets/word_list.dart';
 
 class FoundWords extends StatelessWidget {
   const FoundWords({Key key}) : super(key: key);
 
   // final List<String> words;
 
-  Widget _word(w) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Text(
-          w,
-          style: TextStyle(fontSize: 18),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<SplayTreeSet<String>>(
-      stream: Provider.of(context).game.foundWords ,
-      initialData: SplayTreeSet<String>() ,
-      builder: (BuildContext context, AsyncSnapshot snapshot){
+      stream: Provider.of(context).game.foundWords,
+      initialData: SplayTreeSet<String>(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
         return Container(
           child: _build(context, snapshot.data),
         );
@@ -36,7 +25,6 @@ class FoundWords extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, SplayTreeSet<String> words) {
-
     return Column(
       children: <Widget>[
         buildSwipeMessage("Swipe right to go back to the game."),
@@ -50,11 +38,8 @@ class FoundWords extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-            child:
-                ListView(children: words.map((w) => _word(w)).toList())),
+        Expanded(child: Scrollbar(child: WordList(words: words))),
       ],
     );
   }
 }
-

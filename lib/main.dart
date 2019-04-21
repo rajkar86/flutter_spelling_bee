@@ -3,16 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/ui.dart';
-import 'package:spelling_bee/pages/main_menu.dart';
+import 'package:spelling_bee/pages/game.dart';
+// import 'package:spelling_bee/pages/main_menu.dart';
 // import 'package:spelling_bee/pages/game.dart';
 import 'package:spelling_bee/helpers/provider.dart';
 
 // import 'package:flutter/rendering.dart';
 
-
 void main() async {
   Map wordMap = await Assets.loadMap('assets/words.json');
-  // Map statsMap = await Assets.loadMap('assets/stats.json');
   // debugPaintSizeEnabled = true;
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
@@ -28,16 +27,24 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var title = 'Spelling Bee';
+    var gameBloc = GameBloc(this.wordMap);
     return Provider(
-      game: GameBloc(this.wordMap),
-      // statsMap: this.statsMap,
+      game: gameBloc,
       child: MaterialApp(
         title: title,
         theme: ThemeData(
           primarySwatch: Colors.yellow,
           brightness: Brightness.light,
         ),
-        home: Builder(builder: (context) => scaffold(MainMenu())),
+        home: Builder(builder: (context) {
+          return StreamBuilder<Object>(
+              stream: gameBloc.game,
+              builder: (context, snapshot) {
+                return snapshot.hasData
+                    ? scaffold(Game(), context, true)
+                    : Center(child: CircularProgressIndicator());
+              });
+        }),
       ),
     );
   }
