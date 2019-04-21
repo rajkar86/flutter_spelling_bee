@@ -87,8 +87,6 @@ class _Game {
       var l = words.value;
       l.add(word.value);
       words.add(l);
-      print("points");
-      print(points.value + Logic.points(word.value, game.value));
       points.sink.add(points.value + Logic.points(word.value, game.value));
     }
     _setTempMessage(Message(res ? Logic.sampleSuccessMessage() : status, !res));
@@ -202,7 +200,7 @@ class GameBloc {
         break;
       default:
         {
-          print("Unhandled event");
+          // print("Unhandled event");
         }
         break;
     }

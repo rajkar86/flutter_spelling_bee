@@ -46,19 +46,19 @@ class Game extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        _buildPointDisplay(context, g.wordCount, g.maxWords),
-        _buildPointDisplay(context, g.points, g.maxPoints),
+        _buildPointDisplay(context, g.wordCount, g.maxWords, "word(s)"),
+        _buildPointDisplay(context, g.points, g.maxPoints, "point(s)"),
       ],
     );
   }
 
   StreamBuilder<int> _buildPointDisplay(
-      BuildContext context, Stream<int> curr, int max) {
+      BuildContext context, Stream<int> curr, int max, String text) {
     return StreamBuilder<int>(
         stream: curr,
         builder: (context, snapshot) {
           return snapshot.hasData
-              ? Tally(points: snapshot.data, max: max, text: "point(s)")
+              ? Tally(points: snapshot.data, max: max, text: text)
               : Container();
         });
   }
