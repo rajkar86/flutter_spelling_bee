@@ -11,10 +11,11 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+4
+# flutter build appbundle
+version: 1.0.0+6
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -30,8 +31,18 @@ dependencies:
 
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.7.2
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  android: true
+  image_path: "assets/icon_bee_padded.png"
+  adaptive_icon_background: "#FFFFEB"
+  adaptive_icon_foreground: "assets/icon_bee_padded.png"
+
+# flutter pub run flutter_launcher_icons:main -f pubspec.yaml 
+# flutter pub pub run flutter_launcher_icons:main -f pubspec.yaml 
 
 
 # For information on the generic Dart part of this file, see the
@@ -39,7 +50,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

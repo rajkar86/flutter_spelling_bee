@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/provider.dart';
 
-class Actions extends StatelessWidget {
-  const Actions({Key key})
+class GameActions extends StatelessWidget {
+  const GameActions({Key key})
       : super(key: key);
 
   // final VoidCallback clear;

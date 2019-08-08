@@ -7,7 +7,7 @@ import 'package:spelling_bee/helpers/ui.dart';
 
 import 'package:spelling_bee/pages/found_words.dart';
 
-import 'package:spelling_bee/widgets/actions.dart';
+import 'package:spelling_bee/widgets/game_actions.dart';
 import 'package:spelling_bee/widgets/current_word.dart';
 import 'package:spelling_bee/widgets/letter_collection.dart';
 
@@ -94,5 +94,5 @@ class Game extends StatelessWidget {
     );
   }
 
-  Actions _buildActions() => Actions();
+  GameActions _buildActions() => GameActions();
 }

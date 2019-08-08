@@ -21,13 +21,13 @@ class Rules extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> cards = [Center(child: _card("From New York Times", true))];
+    List<Widget> cards = [];
 
     void addToList(List<String> l, bool header) =>
         cards.addAll(l.map((w) => _card(w, header)).toList());
 
 
-addToList(["Rules"], true);
+addToList(["Rules (from NY Times)"], true);
     addToList([
       "Words must contain at least 4 letters.",
       "Words must include the center letter.",
@@ -36,7 +36,7 @@ addToList(["Rules"], true);
       "Letters can be used more than once.",
     ], false);
 
-    addToList(["Scoring"], true);
+    addToList(["Scoring (from NY Times)"], true);
 
     addToList([
       "4-letter words are worth 1 point each.",

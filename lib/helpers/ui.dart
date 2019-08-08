@@ -37,6 +37,13 @@ class SBDrawer extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
+  Text _buildDrawerItem(String t, {double size}) {
+    return Text(
+      t,
+      style: TextStyle(fontSize: (size != null) ? size : 18),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var gb = Provider.of(context).game;
@@ -44,19 +51,13 @@ class SBDrawer extends StatelessWidget {
       child: ListView(
         children: <Widget>[
           DrawerHeader(
-            child: Text(
-              "Spelling Bee",
-              style: TextStyle(fontSize: 27),
-            ),
+            child: _buildDrawerItem("Spelling Bee", size: 27),
             decoration: BoxDecoration(
               color: Colors.yellow,
             ),
           ),
           ListTile(
-            title: Text(
-              "Abandon game",
-              style: TextStyle(fontSize: 18),
-            ),
+            title: _buildDrawerItem("New game"),
             onTap: () {
               Navigator.pop(context);
               showDialog(
@@ -65,13 +66,11 @@ class SBDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text(
-              "Rules",
-              style: TextStyle(fontSize: 18),
-            ),
+            title: _buildDrawerItem("Rules"),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context, buildPageTransition(scaffold(Rules(), context, false)));
+              Navigator.push(context,
+                  buildPageTransition(scaffold(Rules(), context, false)));
               // showDialog(
               //     context: context,
               //     builder: (context) => Rules());
@@ -83,11 +82,22 @@ class SBDrawer extends StatelessWidget {
   }
 }
 
-Widget scaffold(Widget w, BuildContext context, drawer) {
+Widget scaffold(Widget w, BuildContext context, main) {
   return Scaffold(
-    drawer: drawer ? SBDrawer() : null,
+    drawer: main ? SBDrawer() : null,
     appBar: AppBar(
       title: Text("Spelling Bee"),
+      actions: main
+          ? <Widget>[
+              IconButton(
+                icon: Icon(Icons.help),
+                onPressed: () {
+                  Navigator.push(context,
+                      buildPageTransition(scaffold(Rules(), context, false)));
+                },
+              ),
+            ]
+          : null,
     ),
     body: w,
   );
