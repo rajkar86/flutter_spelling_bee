@@ -45,14 +45,13 @@ class _Game {
 
   BehaviorSubject<int> points = BehaviorSubject<int>();
 
-  int maxWords=0, maxPoints=0;
+  int maxWords = 0, maxPoints = 0;
 
   // Sink<Message> messageSink;
   //Logic.answer(wordMap, game)
 
   void reset(String game, List<String> answer,
       [List<String> wordList = const []]) {
-    
     var words = SplayTreeSet<String>.from(wordList);
     var wordsRemaining = SplayTreeSet<String>.from(answer).difference(words);
     this.game.add(game);
@@ -131,7 +130,8 @@ class GameBloc {
 
   // STREAMS
   Stream<SplayTreeSet<String>> get foundWords => _gameState.words.stream;
-  Stream<SplayTreeSet<String>> get wordsRemaining => _gameState.wordsRemaining.stream;
+  Stream<SplayTreeSet<String>> get wordsRemaining =>
+      _gameState.wordsRemaining.stream;
   Stream<String> get word => _gameState.word.stream;
   Stream<String> get game => _gameState.game.stream;
   Stream<Message> get message => _gameState.message.stream;
@@ -181,8 +181,15 @@ class GameBloc {
 
   void _loadGameHandler(bool resume) {
     String game = resume ? _savedGame.game() : Logic.randomGame(wordMap);
-    List<String> foundWords = resume ? _savedGame.foundWords() : List<String>();
     var answer = Logic.answer(wordMap, game);
+
+    List<String> foundWords = List<String>();
+    if (resume) {
+      foundWords = SplayTreeSet<String>.from(_savedGame.foundWords())
+          .intersection(SplayTreeSet<String>.from(answer))
+          .toList();
+    }
+
     _gameState.reset(game, answer, foundWords);
     if (!resume) _saveGame(true);
   }

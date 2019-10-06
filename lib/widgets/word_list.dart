@@ -9,13 +9,13 @@ class WordList extends StatelessWidget {
 
   Widget _word(w) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(5),
-        child: Text(
-          w,
-          style: TextStyle(fontSize: 18),
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: Text(
+              w,
+              style: TextStyle(fontSize: 18),
+          ),
         ),
-      ),
     );
   }
 

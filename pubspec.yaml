@@ -12,7 +12,7 @@ description: A new Flutter project.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # flutter build appbundle
-version: 1.0.0+6
+version: 1.0.1+12
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
@@ -38,7 +38,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   image_path: "assets/icon_bee_padded.png"
-  adaptive_icon_background: "#FFFFEB"
+  adaptive_icon_background: "#FFFFEB3B"
   adaptive_icon_foreground: "assets/icon_bee_padded.png"
 
 # flutter pub run flutter_launcher_icons:main -f pubspec.yaml 
