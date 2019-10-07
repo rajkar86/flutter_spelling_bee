@@ -1,4 +1,7 @@
-# Source-code for the NY Times style Spelling Bee app that can be downloaded here:
+# Source-code for the NY Times style Spelling Bee app 
 
-https://play.google.com/store/apps/details?id=com.kraj.spelling.bee
+App can be downloaded here: https://play.google.com/store/apps/details?id=com.kraj.spelling.bee
+
+
+![Screenshot](images/Screenshot1.png?raw=true "Screenshot")
 
