@@ -8,24 +8,38 @@ class WordList extends StatelessWidget {
   const WordList({this.words});
 
   Widget _word(w) {
-    return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(5),
-          child: Text(
-              w,
-              style: TextStyle(fontSize: 18),
-          ),
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Text(
+        w,
+        style: TextStyle(fontSize: 18),
+      ),
     );
+  }
+
+  Widget _wordList() {
+    return Scrollbar(
+        child: ListView(children: this.words.map((w) => _word(w)).toList()));
+  }
+
+  Widget _emptyState() {
+    return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.edit, size: 100),
+              Padding(
+                padding: EdgeInsets.all(8),
+              child: Text("No words found", style: TextStyle(fontSize: 24))),
+              Text("Spell some words and they will show up here.")
+            ],
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // height: 100,
-      width: double.maxFinite,
-      child: Scrollbar(
-          child: ListView(children: this.words.map((w) => _word(w)).toList())),
-    );
+        width: double.maxFinite,
+        child: this.words.length == 0 ? _emptyState() : _wordList());
   }
 }

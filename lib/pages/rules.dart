@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-// import 'package:spelling_bee/helpers/ui.dart';
-
 class Rules extends StatelessWidget {
   const Rules({Key key}) : super(key: key);
 
@@ -26,8 +24,7 @@ class Rules extends StatelessWidget {
     void addToList(List<String> l, bool header) =>
         cards.addAll(l.map((w) => _card(w, header)).toList());
 
-
-addToList(["Rules (from NY Times)"], true);
+    addToList(["Rules"], true);
     addToList([
       "Words must contain at least 4 letters.",
       "Words must include the center letter.",
@@ -36,7 +33,7 @@ addToList(["Rules (from NY Times)"], true);
       "Letters can be used more than once.",
     ], false);
 
-    addToList(["Scoring (from NY Times)"], true);
+    addToList(["Scoring"], true);
 
     addToList([
       "4-letter words are worth 1 point each.",
@@ -50,11 +47,10 @@ addToList(["Rules (from NY Times)"], true);
   }
 
   Widget _build(List<Widget> cards) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Expanded(child: ListView(children: cards)),
-      ],
-    );
+    return Scaffold(
+        appBar: AppBar(title: Text("Help")),
+        body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [Expanded(child: ListView(children: cards))]));
   }
 }

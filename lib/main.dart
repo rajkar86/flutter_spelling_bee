@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
               stream: gameBloc.game,
               builder: (context, snapshot) {
                 return snapshot.hasData
-                    ? scaffold(Game(), context, true)
+                    ? scaffold(Game(), context)
                     : Center(child: CircularProgressIndicator());
               });
         }),

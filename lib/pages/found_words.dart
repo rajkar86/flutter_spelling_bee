@@ -27,16 +27,8 @@ class FoundWords extends StatelessWidget {
   Widget _build(BuildContext context, SplayTreeSet<String> words) {
     return Column(
       children: <Widget>[
-        buildSwipeMessage("Swipe right to go back to the game."),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Container(
-            color: Colors.grey,
-            child: Center(
-              child: Text("Words found so far",
-                  style: TextStyle(color: Colors.yellow, fontSize: 18)),
-            ),
-          ),
         ),
         Expanded(child: Scrollbar(child: WordList(words: words))),
       ],
