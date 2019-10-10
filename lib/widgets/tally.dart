@@ -27,6 +27,7 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
   Widget build(BuildContext context) {
     var points = _points.evaluate(animation);
     var width = 3;
+    var percent = points / widget.max;
     return Column(
       children: <Widget>[
         Padding(
@@ -49,7 +50,7 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
               decoration: BoxDecoration(border: Border.all(width: 2.0)),
               child: LinearProgressIndicator(
                 backgroundColor: Colors.yellow,
-                value: points / widget.max,
+                value: !percent.isFinite ? 0 : percent,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
               ),
             ),
