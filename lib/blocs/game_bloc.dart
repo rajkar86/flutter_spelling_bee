@@ -68,6 +68,8 @@ class _Game {
 
   bool addLetter(String l) {
     if (word.value.length > Logic.MAX_WORD_LENGTH) {
+      _setTempMessage(Logic.wordTooLongMessage);
+      clear();
       return false;
     }
     _setWord(word.value + l);

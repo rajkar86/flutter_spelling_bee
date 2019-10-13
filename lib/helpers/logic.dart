@@ -1,10 +1,12 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:spelling_bee/blocs/game_bloc.dart';
 import "package:trotter/trotter.dart";
 
 class Logic {
   static const int MAX_WORD_LENGTH = 17;
+  static Message wordTooLongMessage = Message("Too long!", true);
 
   static String sortWord(String word) {
     var list = word.split("");
