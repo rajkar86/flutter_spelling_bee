@@ -18,14 +18,9 @@ class Game extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageView(
-      children: <Widget>[
-        Column(
+    return Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Container(
-                child:
-                    buildSwipeMessage("Swipe left to see your found words.")),
             Expanded(
               child: Center(
                   child: ListView(shrinkWrap: true, children: <Widget>[
@@ -35,10 +30,7 @@ class Game extends StatelessWidget {
               ])),
             ),
           ],
-        ),
-        FoundWords()
-      ],
-    );
+        );
   }
 
   Widget _buildPointsRow(BuildContext context) {
