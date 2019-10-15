@@ -12,7 +12,8 @@ class Logic {
     return Set<String>.from(list).join();
   }
 
-  static String check(String word, String game, SplayTreeSet<String> foundWords, Map wordMap) {
+  static String check(
+      String word, String game, SplayTreeSet<String> foundWords, Map wordMap) {
     if (foundWords.contains(word)) return "Word already found";
     if (word.length == 0) return "Enter a word first!";
     if (word.length < 4) return "Word too short!";
@@ -32,7 +33,14 @@ class Logic {
   }
 
   static String sampleSuccessMessage() {
-    var m = ["Nice!", "Good job!", "Excellent!", "Way to go!"];
+    var m = [
+      "Nice!",
+      "Good job!",
+      "Excellent!",
+      "Way to go!",
+      "Terrific!",
+      "Brilliant!"
+    ];
     var r = new Random();
     return m[r.nextInt(m.length)];
   }
@@ -71,8 +79,7 @@ class Logic {
   }
 
   static List<String> answer(Map wordMap, String game) {
-    if (game==null)
-      return [];
+    if (game == null) return [];
 
     var sub = Subsets(game.substring(1).split(""))();
 

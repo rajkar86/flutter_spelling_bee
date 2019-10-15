@@ -6,7 +6,7 @@ import 'package:spelling_bee/pages/found_words.dart';
 import 'package:spelling_bee/pages/rules.dart';
 import 'package:spelling_bee/widgets/word_list.dart';
 
-AlertDialog buildMissedWordsDialog(GameBloc gb, BuildContext context) {
+AlertDialog buildMissedWordsDialog(BuildContext context) {
   return AlertDialog(
       title: Text("Missed Words"),
       content: StreamBuilder(
@@ -26,7 +26,7 @@ AlertDialog buildMissedWordsDialog(GameBloc gb, BuildContext context) {
             style: TextStyle(color: Colors.black),
           ),
           onPressed: () {
-            gb.eventSink.add(Event.LOAD);
+            Provider.of(context).game.eventSink.add(Event.LOAD);
             Navigator.pop(context);
           },
         ),
@@ -46,11 +46,7 @@ Widget scaffold(Widget w, BuildContext context) {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (context) =>
-                            buildMissedWordsDialog(
-                                Provider
-                                    .of(context)
-                                    .game, context));
+                        builder: (context) => buildMissedWordsDialog(context));
                   },
                 ),
                 IconButton(
