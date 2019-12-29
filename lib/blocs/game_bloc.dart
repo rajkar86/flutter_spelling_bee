@@ -83,7 +83,7 @@ class _Game {
 
   void _setTempMessage(m) {
     message.add(m);
-    //TODO take this logic out of the bloc
+    //TODO() take this logic out of the bloc
     Timer(Duration(milliseconds: 500), () => message.add(Message("")));
   }
 

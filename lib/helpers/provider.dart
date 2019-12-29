@@ -11,7 +11,7 @@ class Provider extends InheritedWidget {
   final GameBloc game;
 
   static Provider of(BuildContext context) =>
-      context.inheritFromWidgetOfExactType(Provider) as Provider;
+      context.dependOnInheritedWidgetOfExactType();
 
   @override
   // bool updateShouldNotify(Provider oldWidget) => oldWidget != this;
