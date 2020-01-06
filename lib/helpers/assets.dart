@@ -28,4 +28,26 @@ class Assets {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.remove("game");
   }
+
+  static Future<bool> setUseEnableDict(bool useEnable) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setBool("useEnable", useEnable);
+  }
+
+  static Future<bool> getUseEnableDict() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool("useEnable") ?? false;
+  }
+
+  static Future<bool> removeUseEnableDict() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.remove("useEnable");
+  }
+
+  static Future<Map> getWordMap(bool useEnableDict) async {
+    var json = useEnableDict ? 'assets/words_large.json' : 'assets/words.json';
+    var wordMap = await loadMap(json);
+    return wordMap; 
+  }
+
 }

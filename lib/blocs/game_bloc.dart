@@ -125,13 +125,15 @@ class _Game {
 }
 
 class GameBloc {
-  final Map wordMap;
   var _gameState = _Game();
+  var _reloadWordMap = false;
+
+  BehaviorSubject<bool> _useEnableDict = BehaviorSubject<bool>();
+  BehaviorSubject<Map> _wordMap = BehaviorSubject<Map>();
 
   // STREAMS
   Stream<SplayTreeSet<String>> get foundWords => _gameState.words.stream;
-  Stream<SplayTreeSet<String>> get wordsRemaining =>
-      _gameState.wordsRemaining.stream;
+
   Stream<String> get word => _gameState.word.stream;
   Stream<String> get game => _gameState.game.stream;
   Stream<Message> get message => _gameState.message.stream;
@@ -139,7 +141,10 @@ class GameBloc {
 
   Stream<int> get points => _gameState.points.stream;
   Stream<int> get wordCount => _gameState.words.map((x) => x.length);
+  Stream<bool> get useEnableDict => _useEnableDict.stream;
 
+  SplayTreeSet<String> get wordsRemaining =>
+      _gameState.wordsRemaining.stream.value;
   int get maxPoints => _gameState.maxPoints;
   int get maxWords => _gameState.maxWords;
 
@@ -153,17 +158,42 @@ class GameBloc {
   final _loadGame = PublishSubject<bool>();
   Sink<bool> get loadGameSink => _loadGame.sink;
 
+  //final _useEnableDict = PublishSubject<bool>();
+  Sink<bool> get useEnableDictSink => _useEnableDict.sink;
+
   final _nextLetter = PublishSubject<String>();
   Sink<String> get nextLetterSink => _nextLetter.sink;
 
   _GameStore _savedGame;
 
-  GameBloc(this.wordMap) {
-    _init();
+  GameBloc();
+
+  Future<void> loadWordMap() async {
+    var useEnableDict = await Assets.getUseEnableDict();
+    _useEnableDict.add(useEnableDict);
+    var wordMap = await Assets.getWordMap(useEnableDict);
+    this._wordMap.add(wordMap);
+  }
+
+  Future<void> init() async {
+    await loadWordMap();
+    _savedGame = _GameStore.fromCache(await Assets.getGame());
+    var isGameSaved = _savedGame.val().length > 0;
+    _isGameSaved.add(isGameSaved);
+    _loadGameHandler(isGameSaved);
+
     _loadGame.listen(_loadGameHandler);
     _nextLetter.listen(_gameState.addLetter);
     _event.listen(_eventHandler);
-    wordCount.listen(print);
+    _useEnableDict.listen(_useEnableDictHandler);
+    //wordCount.listen(print);
+  }
+
+  void _useEnableDictHandler(bool use) async {
+    await Assets.setUseEnableDict(use);
+    _reloadWordMap = true;
+    // await loadWordMap();
+    // _loadGameHandler(true);
   }
 
   void _saveGame(bool save) {
@@ -172,15 +202,16 @@ class GameBloc {
     _isGameSaved.add(save);
   }
 
-  Future<void> _init() async {
-    _savedGame = _GameStore.fromCache(await Assets.getGame());
-    var isGameSaved = _savedGame.val().length > 0;
-    _isGameSaved.add(isGameSaved);
-    _loadGameHandler(isGameSaved);
-  }
-
-  void _loadGameHandler(bool resume) {
-    String game = resume ? _savedGame.game() : Logic.randomGame(wordMap);
+  Future<void> _loadGameHandler(bool resume) async {
+    if (_reloadWordMap) {
+      await loadWordMap();
+      _reloadWordMap = false;
+    }
+    var wordMap = this._wordMap.stream.value;
+    String game = _savedGame.game();
+    game = (resume && Logic.isGameValid(wordMap, game))
+        ? game
+        : Logic.randomGame(wordMap);
     var answer = Logic.answer(wordMap, game);
 
     List<String> foundWords = List<String>();
@@ -195,6 +226,7 @@ class GameBloc {
   }
 
   void _eventHandler(Event e) {
+    var wordMap = this._wordMap.stream.value;
     switch (e) {
       case Event.LOAD:
         {
@@ -237,5 +269,7 @@ class GameBloc {
     _loadGame.close();
     _nextLetter.close();
     _event.close();
+    _useEnableDict.close();
+    _wordMap.close();
   }
 }

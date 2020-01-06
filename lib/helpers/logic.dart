@@ -46,12 +46,20 @@ class Logic {
   }
 
   static String randomGame(Map wordMap) {
+    // return "TAENHIR";
     var games = wordMap.keys.where((x) => x.length == 7).toList();
     final _random = new Random();
     var game = games[_random.nextInt(games.length)].toString();
-    // print(game);
-    // print(answer(wordMap, game));
-    return game;
+    var pos = _random.nextInt(7);
+    return game.substring(pos, pos + 1) +
+        game.substring(0, max(0, pos)) +
+        game.substring(pos + 1, 7);
+  }
+
+  static bool isGameValid(Map wordMap, String game) {
+    var key = game.split('');
+    key.sort();
+    return wordMap.containsKey(key.join(''));
   }
 
   static String shuffleWord(String word) {

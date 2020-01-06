@@ -6,8 +6,6 @@ class Provider extends InheritedWidget {
       : super(key: key, child: child);
 
   final Widget child;
-  // final Map wordMap;
-  // final Map statsMap;
   final GameBloc game;
 
   static Provider of(BuildContext context) =>

@@ -1,34 +1,36 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/provider.dart';
 import 'package:spelling_bee/pages/found_words.dart';
+import 'package:spelling_bee/pages/settings.dart';
 import 'package:spelling_bee/pages/rules.dart';
 import 'package:spelling_bee/widgets/word_list.dart';
 
 AlertDialog buildMissedWordsDialog(BuildContext context) {
+  var game = Provider.of(context).game;
+  var words = game.wordsRemaining;
   return AlertDialog(
       title: Text("Missed Words"),
-      content: StreamBuilder(
-          stream: Provider.of(context).game.wordsRemaining,
-          builder: (context, snapshot) {
-            return snapshot.hasData
-                ? WordList(words: snapshot.data)
-                : Center(
-                    child: CircularProgressIndicator(),
-                  );
-          }),
+      content: WordList(words: SplayTreeSet<String>.from(words)),
       actions: <Widget>[
-        RaisedButton(
-          color: Colors.yellow,
-          child: Text(
-            'Proceed to new game',
-            style: TextStyle(color: Colors.black),
-          ),
-          onPressed: () {
-            Provider.of(context).game.eventSink.add(Event.LOAD);
-            Navigator.pop(context);
-          },
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            RaisedButton(
+              color: Colors.yellow,
+              child: Text(
+                'Proceed to new game',
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () {
+                game.eventSink.add(Event.LOAD);
+                Navigator.pop(context);
+              },
+            ),
+          ],
         ),
       ]);
 }
@@ -47,6 +49,13 @@ Widget scaffold(Widget w, BuildContext context) {
                     showDialog(
                         context: context,
                         builder: (context) => buildMissedWordsDialog(context));
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.settings),
+                  tooltip: "Settings",
+                  onPressed: () {
+                    Navigator.push(context, buildPageTransition(Settings()));
                   },
                 ),
                 IconButton(
