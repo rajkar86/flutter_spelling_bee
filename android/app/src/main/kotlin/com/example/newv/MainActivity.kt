@@ -1,4 +1,4 @@
-package com.kraj.spelling_bee
+package com.kraj.spelling.bee
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
