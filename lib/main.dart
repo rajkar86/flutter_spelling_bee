@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
-//import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/pages/game.dart';
 import 'package:spelling_bee/helpers/provider.dart';
+import 'package:spelling_bee/pages/rules.dart';
+import 'package:spelling_bee/pages/settings.dart';
+import 'package:native_state/native_state.dart';
 
 // import 'package:flutter/rendering.dart';
 
@@ -16,8 +18,27 @@ Future main() async {
   // debugPaintSizeEnabled = true;
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
-    runApp(new MyApp(gameBloc: gameBloc));
+    runApp(SavedState(child: MyApp(gameBloc: gameBloc)));
   });
+}
+
+class GameScreen extends StatelessWidget {
+  const GameScreen({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(builder: (context) {
+      return StreamBuilder<Object>(
+          stream: Provider.of(context).game.game,
+          builder: (context, snapshot) {
+            return snapshot.hasData
+                ? scaffold(Game(), context)
+                : Center(child: CircularProgressIndicator());
+          });
+    });
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -28,7 +49,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    var title = 'Spelling Bee';
+    var title = '7 Letter Pangrams';
+    var savedState = SavedState.of(context);
     return Provider(
       game: this.gameBloc,
       child: MaterialApp(
@@ -37,16 +59,20 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.yellow,
           brightness: Brightness.light,
         ),
-        home: Builder(builder: (context) {
-          return StreamBuilder<Object>(
-              stream: gameBloc.game,
-              builder: (context, snapshot) {
-                return snapshot.hasData
-                    ? scaffold(Game(), context)
-                    : Center(child: CircularProgressIndicator());
-              });
-        }),
+        navigatorKey: GlobalKey(),
+        navigatorObservers: [SavedStateRouteObserver(savedState: savedState)],
+        initialRoute: SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
+        routes: {
+          '/': (context) => GameScreen(),
+          '/settings': (context) => Settings(),
+          '/rules': (context) => Rules(),
+        },
+        
+        // home: GameScreen(),
+        // onGenerateRoute: Router.generateRoute,
       ),
     );
   }
 }
+
+

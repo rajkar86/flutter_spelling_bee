@@ -5,8 +5,6 @@ import 'package:page_transition/page_transition.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/provider.dart';
 import 'package:spelling_bee/pages/found_words.dart';
-import 'package:spelling_bee/pages/settings.dart';
-import 'package:spelling_bee/pages/rules.dart';
 import 'package:spelling_bee/widgets/word_list.dart';
 
 AlertDialog buildMissedWordsDialog(BuildContext context) {
@@ -40,7 +38,7 @@ Widget scaffold(Widget w, BuildContext context) {
       length: 2,
       child: Scaffold(
           appBar: AppBar(
-              title: Text("Spelling Bee"),
+              title: Text("7 Letter Pangrams"),
               actions: [
                 IconButton(
                   icon: Icon(Icons.add),
@@ -55,14 +53,16 @@ Widget scaffold(Widget w, BuildContext context) {
                   icon: Icon(Icons.settings),
                   tooltip: "Settings",
                   onPressed: () {
-                    Navigator.push(context, buildPageTransition(Settings()));
+                    Navigator.pushNamed(context, '/settings');
+                    //Navigator.push(context, buildPageTransition(Settings()));
                   },
                 ),
                 IconButton(
                   icon: Icon(Icons.help),
                   tooltip: "Help",
                   onPressed: () {
-                    Navigator.push(context, buildPageTransition(Rules()));
+                    Navigator.pushNamed(context, '/rules');
+                    // Navigator.push(context, buildPageTransition(Rules()));
                   },
                 ),
               ],

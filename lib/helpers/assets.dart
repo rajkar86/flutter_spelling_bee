@@ -36,7 +36,7 @@ class Assets {
 
   static Future<bool> getUseEnableDict() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool("useEnable") ?? false;
+    return prefs.getBool("useEnable") ?? true;
   }
 
   static Future<bool> removeUseEnableDict() async {

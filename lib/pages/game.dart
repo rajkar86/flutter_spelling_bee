@@ -54,14 +54,14 @@ class Game extends StatelessWidget {
 
   Widget _buildKeyPad(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
+      padding: const EdgeInsets.only(top: 1.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           _buildMessage(context),
           CurrentWord(),
           Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 2.0),
             child: LetterCollection(),
           ),
           // LetterCollection(letters: , onPressed: _nextLetterHandler),

@@ -36,11 +36,9 @@ class Settings extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: <Widget>[
-              Text(
-                  "If enabled, the dictionary used in popular games like Words With Friends will be used. "),
-              Text(
-                  "Using this dictionary, which is larger than the default option will result in the game accepting more words as valid, " +
-                      "but will also require you to find a lot more words. "),
+              Text("If enabled, the dictionary used in popular games like Words With Friends will be used. " +
+                  "Using this dictionary, which is larger than the default option, will result in the game accepting more words as valid, " +
+                  "but will also require you to find a lot more words. "),
               Text(
                   "Note that changes take place when you start a new game or on full restart of the app."),
             ],

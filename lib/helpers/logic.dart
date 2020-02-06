@@ -17,7 +17,7 @@ class Logic {
     if (foundWords.contains(word)) return "Word already found";
     if (word.length == 0) return "Enter a word first!";
     if (word.length < 4) return "Word too short!";
-    if (!(word.contains(game[0]))) return "Does not contain center word!";
+    if (!(word.contains(game[0]))) return "Does not contain center letter!";
     var key = sortWord(word);
     return (wordMap.keys.contains(key) && wordMap[key].contains(word))
         ? ""
