@@ -12,7 +12,7 @@ description: A new Flutter project.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # flutter build appbundle
-version: 1.0.1+16
+version: 1.0.1+18
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
@@ -29,6 +29,7 @@ dependencies:
   shared_preferences: ^0.5.2
   rxdart : ^0.21.0
   native_state: ^1.0.0-rc01
+  polygon_clipper: ^1.0.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.7.2

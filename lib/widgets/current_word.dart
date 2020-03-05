@@ -46,7 +46,7 @@ class CurrentWord extends StatelessWidget {
         Center(
           child: Container(
             child: Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.only(left:4.0,right:4.0),
               child: Text(
                 word,
                 style: TextStyle(fontSize: sz, letterSpacing: 0),

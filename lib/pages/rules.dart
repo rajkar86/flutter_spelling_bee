@@ -28,9 +28,8 @@ class Rules extends StatelessWidget {
     addToList([
       "Words must contain at least 4 letters.",
       "Words must include the center letter.",
-      "No proper nouns.",
-      "No hyphenated words.",
       "Letters can be used more than once.",
+      "Word must be in ENABLE2k word list",
     ], false);
 
     addToList(["Scoring"], true);

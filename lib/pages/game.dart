@@ -54,7 +54,7 @@ class Game extends StatelessWidget {
 
   Widget _buildKeyPad(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 1.0),
+      padding: const EdgeInsets.only(top: 0.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

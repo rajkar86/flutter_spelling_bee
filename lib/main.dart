@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/pages/game.dart';
@@ -14,7 +15,7 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var gameBloc = GameBloc();
   await gameBloc.init();
-  // Map wordMap = await Assets.loadMap('assets/words.json');
+
   // debugPaintSizeEnabled = true;
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
@@ -41,6 +42,10 @@ class GameScreen extends StatelessWidget {
   }
 }
 
+PageTransition buildPageTransition(Widget w) {
+  return PageTransition(type: PageTransitionType.rightToLeftWithFade, child: w);
+}
+
 class MyApp extends StatelessWidget {
   final GameBloc gameBloc;
   // final Map wordMap;
@@ -49,7 +54,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    var title = '7 Letter Pangrams';
+    var title = 'Not That Spelling Bee';
     var savedState = SavedState.of(context);
     return Provider(
       game: this.gameBloc,
@@ -67,9 +72,6 @@ class MyApp extends StatelessWidget {
           '/settings': (context) => Settings(),
           '/rules': (context) => Rules(),
         },
-        
-        // home: GameScreen(),
-        // onGenerateRoute: Router.generateRoute,
       ),
     );
   }

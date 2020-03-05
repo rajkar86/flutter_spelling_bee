@@ -38,7 +38,7 @@ Widget scaffold(Widget w, BuildContext context) {
       length: 2,
       child: Scaffold(
           appBar: AppBar(
-              title: Text("7 Letter Pangrams"),
+              title: Text("Not That Spelling Bee", style: TextStyle(fontSize: 18)),
               actions: [
                 IconButton(
                   icon: Icon(Icons.add),
