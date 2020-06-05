@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:rxdart/rxdart.dart';
+import 'package:spelling_bee/blocs/settings_bloc.dart';
 import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/logic.dart';
 
@@ -125,6 +126,11 @@ class _Game {
 }
 
 class GameBloc {
+  
+  GameBloc({this.settingsBloc});
+
+  final SettingsBloc settingsBloc;
+  
   var _gameState = _Game();
   var _reloadWordMap = false;
 
@@ -166,8 +172,6 @@ class GameBloc {
 
   _GameStore _savedGame;
 
-  GameBloc();
-
   Future<void> loadWordMap() async {
     var useEnableDict = await Assets.getUseEnableDict();
     _useEnableDict.add(useEnableDict);
@@ -185,6 +189,7 @@ class GameBloc {
     _loadGame.listen(_loadGameHandler);
     _nextLetter.listen(_gameState.addLetter);
     _event.listen(_eventHandler);
+
     _useEnableDict.listen(_useEnableDictHandler);
     //wordCount.listen(print);
   }

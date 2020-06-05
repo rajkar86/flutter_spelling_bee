@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
+import 'package:spelling_bee/blocs/settings_bloc.dart';
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/pages/game.dart';
 import 'package:spelling_bee/helpers/provider.dart';
@@ -13,7 +14,10 @@ import 'package:native_state/native_state.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  var gameBloc = GameBloc();
+  var settingsBloc = SettingsBloc();
+  await settingsBloc.init();
+
+  var gameBloc = GameBloc(settingsBloc: settingsBloc);
   await gameBloc.init();
 
   // debugPaintSizeEnabled = true;
@@ -66,18 +70,23 @@ class MyApp extends StatelessWidget {
 
     return Provider(
       game: this.gameBloc,
-      child: MaterialApp(
-        title: title,
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        navigatorKey: GlobalKey(),
-        navigatorObservers: [SavedStateRouteObserver(savedState: savedState)],
-        initialRoute: SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
-        routes: {
-          '/': (context) => GameScreen(),
-          '/settings': (context) => Settings(),
-          '/rules': (context) => Rules(),
-        },
+      child: StreamBuilder(
+        stream: this.gameBloc.useEnableDict,
+        builder: (context, snapshot) {
+          return MaterialApp(
+            title: title,
+            theme: snapshot.data ? darkTheme : lightTheme,
+            darkTheme: darkTheme,
+            navigatorKey: GlobalKey(),
+            navigatorObservers: [SavedStateRouteObserver(savedState: savedState)],
+            initialRoute: SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
+            routes: {
+              '/': (context) => GameScreen(),
+              '/settings': (context) => Settings(),
+              '/rules': (context) => Rules(),
+            },
+          );
+        }
       ),
     );
   }
