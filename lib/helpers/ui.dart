@@ -10,6 +10,9 @@ import 'package:spelling_bee/widgets/word_list.dart';
 AlertDialog buildMissedWordsDialog(BuildContext context) {
   var game = Provider.of(context).game;
   var words = game.wordsRemaining;
+  
+  bool isDark = Theme.of(context).brightness == Brightness.dark;
+
   return AlertDialog(
       title: Text("Missed Words"),
       content: WordList(words: SplayTreeSet<String>.from(words)),
@@ -18,7 +21,7 @@ AlertDialog buildMissedWordsDialog(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             RaisedButton(
-              color: Colors.yellow,
+              color: isDark ? Colors.grey : Colors.yellow,
               child: Text(
                 'Proceed to new game',
                 style: TextStyle(color: Colors.black),

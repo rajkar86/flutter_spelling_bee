@@ -34,7 +34,7 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
           padding: const EdgeInsets.all(8.0),
           child: Text(points.toString().padLeft(width, " ") + " " + widget.text,
               // widget.max.toString(),
-              style: TextStyle(color: Colors.black, fontSize: 21)),
+              style: TextStyle(fontSize: 21)),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -42,14 +42,14 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: Text("0",
-                  style: TextStyle(color: Colors.black, fontSize: 12)),
+                  style: TextStyle(fontSize: 12)),
             ),
             Container(
               width: 50,
               height: 10,
               decoration: BoxDecoration(border: Border.all(width: 2.0)),
               child: LinearProgressIndicator(
-                backgroundColor: Colors.yellow,
+                // backgroundColor: Colors.black,
                 value: !percent.isFinite ? 0 : percent,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
               ),
@@ -57,7 +57,7 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: Text(widget.max.toString() + "",
-                  style: TextStyle(color: Colors.black, fontSize: 12)),
+                  style: TextStyle(fontSize: 12)),
             )
           ],
         ),

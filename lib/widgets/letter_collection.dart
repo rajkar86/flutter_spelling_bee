@@ -21,13 +21,14 @@ class LetterCollection extends StatelessWidget {
   Widget _build(BuildContext context, String letters) {
     double sz = 80;
 
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    var color1 =  Colors.black;
+    var color2 =  isDark ? Colors.grey : Colors.yellow;
+    
     Widget _button(String c, [bool center = false]) {
       var s = TextStyle(
-          color: (center ? Colors.yellow : Colors.black), fontSize: 24);
-
-      //  = Theme.of(context).textTheme.title;
-      // if (center)
-      //   s.color = Colors.yellow;
+          color: (center ? color2 : color1), fontSize: 24);
+           
       return Center(
         child: Padding(
           padding: EdgeInsets.only(left:sz*0.4, right:sz*0.4),
@@ -38,7 +39,7 @@ class LetterCollection extends StatelessWidget {
               onPressed: () {
                 Provider.of(context).game.nextLetterSink.add(c);
               },
-              color: (center ? Colors.black : Colors.yellow),
+              color: (center ? color1 : color2),
               shape: PolygonBorder(
                 sides: 6,
                 borderRadius: 0.0, // Default 0.0 degrees 

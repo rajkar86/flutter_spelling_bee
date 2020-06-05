@@ -56,14 +56,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     var title = 'Not That Spelling Bee';
     var savedState = SavedState.of(context);
+
+    var lightTheme = ThemeData(
+      primarySwatch: Colors.yellow,
+      brightness: Brightness.light,
+    );
+
+    var darkTheme = ThemeData.dark();
+
     return Provider(
       game: this.gameBloc,
       child: MaterialApp(
         title: title,
-        theme: ThemeData(
-          primarySwatch: Colors.yellow,
-          brightness: Brightness.light,
-        ),
+        theme: lightTheme,
+        darkTheme: darkTheme,
         navigatorKey: GlobalKey(),
         navigatorObservers: [SavedStateRouteObserver(savedState: savedState)],
         initialRoute: SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
@@ -76,5 +82,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-

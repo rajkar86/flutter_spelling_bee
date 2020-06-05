@@ -14,20 +14,20 @@ class GameActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+    //bool isDark = MediaQuery.of(context).platformBrightness == Brightness.light; //TODO change
+
     Widget _icon(IconData i, String t, Event e) {
     return Column(
       children: <Widget>[
         FlatButton(
           // iconSize: SIZE,
           child: Column(
-            children: <Widget>[Icon(i, color: Colors.black, size: SIZE),Text(t)],
+            children: <Widget>[Icon(i, size: SIZE),Text(t)],
           ),
-          // label: Text(t),
-          // color: Colors.yellow,
           color: Colors.transparent,
-          splashColor: Colors.grey,
+          // splashColor: Colors.grey,
           onPressed: () => Provider.of(context).game.eventSink.add(e),
-          // disabledColor: Colors.blueGrey,
         ),
       ],
     );
@@ -44,23 +44,4 @@ class GameActions extends StatelessWidget {
       ),
     );
   }
-
-  
-
-  // Widget button(String s, VoidCallback c) {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(27.0),
-  //     child: ButtonTheme(
-  //       child: RaisedButton(
-  //         color: Colors.black,
-  //         highlightColor: Colors.green,
-  //         onPressed: c,
-  //         shape: BeveledRectangleBorder(
-  //           borderRadius: BorderRadius.circular(5.0),
-  //         ),
-  //         child: Text(s, style: TextStyle(color: Colors.white, fontSize: 20)),
-  //       ),
-  //     ),
-  //   );
-  // }
 }
