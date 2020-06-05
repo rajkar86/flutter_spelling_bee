@@ -34,20 +34,5 @@ class Assets {
     var wordMap = await loadMap(json);
     return wordMap; 
   }
-  
-  static Future<bool> setUseEnableDict(bool useEnable) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setBool("useEnable", useEnable);
-  }
-
-  static Future<bool> getUseEnableDict() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool("useEnable") ?? true;
-  }
-
-  static Future<bool> removeUseEnableDict() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.remove("useEnable");
-  }
 
 }

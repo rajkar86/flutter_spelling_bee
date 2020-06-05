@@ -23,7 +23,7 @@ class Settings extends StatelessWidget {
                     ? Switch(
                         value: snapshot.data,
                         onChanged: (bool b) {
-                          game.useEnableDictSink.add(b);
+                          game.settings.useEnableDict.sink.add(b);
                         })
                     : Center(
                         child: CircularProgressIndicator(),

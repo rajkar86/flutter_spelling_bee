@@ -7,7 +7,7 @@ enum Themes { SYSTEM, LIGHT, DARK }
 
 class SettingsBloc {
 
-  // Public, but only use stream and sink
+  // Don't use BehaviorSubjects directly in clients
   BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
   BehaviorSubject<int> theme = BehaviorSubject<int>();
 
@@ -23,7 +23,7 @@ class SettingsBloc {
       // _reloadWordMap = true;
     });     
 
-    theme.add(prefs.getInt("theme") ?? Themes.SYSTEM);
+    theme.add(prefs.getInt("theme") ?? Themes.SYSTEM.index);
     theme.listen((int theme){
       prefs.setInt("theme", theme);
     });

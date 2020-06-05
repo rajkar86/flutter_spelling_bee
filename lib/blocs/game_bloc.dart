@@ -127,14 +127,13 @@ class _Game {
 
 class GameBloc {
   
-  GameBloc({this.settingsBloc});
-
-  final SettingsBloc settingsBloc;
+  GameBloc();
   
+  var settings = SettingsBloc();
   var _gameState = _Game();
-  var _reloadWordMap = false;
+  var _loadEnableDict = false;
 
-  BehaviorSubject<bool> _useEnableDict = BehaviorSubject<bool>();
+  // BehaviorSubject<bool> _useEnableDict = BehaviorSubject<bool>();
   BehaviorSubject<Map> _wordMap = BehaviorSubject<Map>();
 
   // STREAMS
@@ -147,7 +146,7 @@ class GameBloc {
 
   Stream<int> get points => _gameState.points.stream;
   Stream<int> get wordCount => _gameState.words.map((x) => x.length);
-  Stream<bool> get useEnableDict => _useEnableDict.stream;
+  Stream<bool> get useEnableDict => settings.useEnableDict.stream;
 
   SplayTreeSet<String> get wordsRemaining =>
       _gameState.wordsRemaining.stream.value;
@@ -164,22 +163,13 @@ class GameBloc {
   final _loadGame = PublishSubject<bool>();
   Sink<bool> get loadGameSink => _loadGame.sink;
 
-  //final _useEnableDict = PublishSubject<bool>();
-  Sink<bool> get useEnableDictSink => _useEnableDict.sink;
-
   final _nextLetter = PublishSubject<String>();
   Sink<String> get nextLetterSink => _nextLetter.sink;
 
   _GameStore _savedGame;
 
-  Future<void> loadWordMap() async {
-    var useEnableDict = await Assets.getUseEnableDict();
-    _useEnableDict.add(useEnableDict);
-    var wordMap = await Assets.getWordMap(useEnableDict);
-    this._wordMap.add(wordMap);
-  }
-
   Future<void> init() async {
+    await settings.init(); // Do this first
     await loadWordMap();
     _savedGame = _GameStore.fromCache(await Assets.getGame());
     var isGameSaved = _savedGame.val().length > 0;
@@ -189,16 +179,13 @@ class GameBloc {
     _loadGame.listen(_loadGameHandler);
     _nextLetter.listen(_gameState.addLetter);
     _event.listen(_eventHandler);
-
-    _useEnableDict.listen(_useEnableDictHandler);
-    //wordCount.listen(print);
   }
 
-  void _useEnableDictHandler(bool use) async {
-    await Assets.setUseEnableDict(use);
-    _reloadWordMap = true;
-    // await loadWordMap();
-    // _loadGameHandler(true);
+  Future<void> loadWordMap() async {
+    print(_wordMap.hasValue);
+    _loadEnableDict = settings.useEnableDict.stream.value;
+    var wordMap = await Assets.getWordMap(_loadEnableDict);
+    this._wordMap.add(wordMap);
   }
 
   void _saveGame(bool save) {
@@ -208,9 +195,8 @@ class GameBloc {
   }
 
   Future<void> _loadGameHandler(bool resume) async {
-    if (_reloadWordMap) {
+    if (_loadEnableDict != settings.useEnableDict.stream.value) {
       await loadWordMap();
-      _reloadWordMap = false;
     }
     var wordMap = this._wordMap.stream.value;
     String game = _savedGame.game();
@@ -274,7 +260,6 @@ class GameBloc {
     _loadGame.close();
     _nextLetter.close();
     _event.close();
-    _useEnableDict.close();
     _wordMap.close();
   }
 }
