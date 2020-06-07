@@ -1,56 +1,119 @@
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:spelling_bee/helpers/provider.dart';
+
+String themeString(ThemeMode t) {
+  var s = t.toString().split(".").last;
+  return s[0].toUpperCase() + s.substring(1);
+}
 
 class Settings extends StatelessWidget {
   const Settings({Key key}) : super(key: key);
 
-  Widget _setting(context) {
+  Widget _settings(context) {
     var game = Provider.of(context).game;
-    return Card(
+    var useEnableDict = game.settings.useEnableDict;
+    var theme = game.settings.theme;
+
+    return Column(
+      children: [
+        _setting("Theme", themeString(ThemeMode.values[theme.stream.value]),
+            Container(), () {
+          showDialog(
+              context: context,
+              builder: (context) => _optionsDialog(context, theme));
+        }),
+        _setting(
+            "Use large dictionary",
+            "If enabled, the dictionary used in popular games like Words With Friends will be used. " +
+                "Using this dictionary, which is larger than the default option, will result in the game accepting more words as valid, " +
+                "but will also require you to find a lot more words." +
+                "Note that changes take place when you start a new game or on full restart of the app.",
+            switchControl(useEnableDict), () {
+          useEnableDict.sink.add(!useEnableDict.stream.value);
+        })
+      ],
+    );
+  }
+
+  Card _setting(
+      String title, String subtitle, Widget control, Function() onTap) {
+    var inkWell = InkWell(
         child: Column(
-      children: <Widget>[
-        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Expanded(
-                child: Text(
-              "Use large dictionary",
-              style: TextStyle(fontSize: 20),
-            )),
-            StreamBuilder(
-              stream: game.useEnableDict,
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                return snapshot.hasData
-                    ? Switch(
-                        value: snapshot.data,
-                        onChanged: (bool b) {
-                          game.settings.useEnableDict.sink.add(b);
-                        })
-                    : Center(
-                        child: CircularProgressIndicator(),
-                      );
-              },
-            )
+            Row(
+              children: <Widget>[
+                Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                  title,
+                  style: TextStyle(fontSize: 18),
+                ),
+                    )),
+                control,
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(subtitle, style: TextStyle(color: Colors.grey)),
+            ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Text("If enabled, the dictionary used in popular games like Words With Friends will be used. " +
-                  "Using this dictionary, which is larger than the default option, will result in the game accepting more words as valid, " +
-                  "but will also require you to find a lot more words. "),
-              Text(
-                  "Note that changes take place when you start a new game or on full restart of the app."),
-            ],
-          ),
-        )
-      ],
-    ));
+        onTap: onTap);
+    return Card(child: inkWell);
+  }
+
+  StreamBuilder<bool> switchControl(BehaviorSubject<bool> sub) {
+    return StreamBuilder(
+      stream: sub.stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return snapshot.hasData
+            ? Switch(
+                value: snapshot.data,
+                onChanged: (bool b) {
+                  sub.sink.add(b);
+                })
+            : Center(
+                child: CircularProgressIndicator(),
+              );
+      },
+    );
+  }
+
+  // TODO make this generic
+  AlertDialog _optionsDialog(BuildContext context, BehaviorSubject<int> choice) {
+    return AlertDialog(
+      title: Text("Theme"),
+      content: StreamBuilder(
+          stream: choice.stream,
+          builder: (context, snapshot) {
+            return snapshot.hasData
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: ThemeMode.values
+                        .map((v) => RadioListTile(
+                            title: Text(themeString(v)),
+                            groupValue: choice.stream.value,
+                            value: v.index,
+                            onChanged: (val) {
+                              choice.sink.add(v.index);
+                              Navigator.pop(context);
+                            }))
+                        .toList(),
+                  )
+                : Center(
+                    child: CircularProgressIndicator(),
+                  );
+          }),
+      // actions:
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return _build(<Widget>[_setting(context)]);
+    return _build(<Widget>[_settings(context)]);
   }
 
   Widget _build(List<Widget> w) {

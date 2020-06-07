@@ -1,9 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-enum Themes { SYSTEM, LIGHT, DARK }
 
 class SettingsBloc {
 
@@ -23,7 +22,7 @@ class SettingsBloc {
       // _reloadWordMap = true;
     });     
 
-    theme.add(prefs.getInt("theme") ?? Themes.SYSTEM.index);
+    theme.add(prefs.getInt("theme") ?? ThemeMode.system.index);
     theme.listen((int theme){
       prefs.setInt("theme", theme);
     });

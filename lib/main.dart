@@ -13,7 +13,7 @@ import 'package:native_state/native_state.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   var gameBloc = GameBloc();
   await gameBloc.init();
 
@@ -56,7 +56,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var title = 'Not That Spelling Bee';
-    var savedState = SavedState.of(context);
 
     var lightTheme = ThemeData(
       primarySwatch: Colors.yellow,
@@ -65,34 +64,34 @@ class MyApp extends StatelessWidget {
 
     var darkTheme = ThemeData.dark();
 
+    var navigatorKey = GlobalKey<NavigatorState>();
+    var savedState = SavedState.of(context);
+    var routeObserver = SavedStateRouteObserver(savedState: savedState);
+
     return Provider(
       game: this.gameBloc,
       child: StreamBuilder(
-          stream: this.gameBloc.useEnableDict, //TODO change
+          stream: this.gameBloc.settings.theme,
           builder: (context, snapshot) {
-            return snapshot.hasData
-                ? MaterialApp(
-                    title: title,
-                    theme: snapshot.data
-                        ? darkTheme
-                        : lightTheme,
-                    darkTheme: darkTheme,
-                    navigatorKey: GlobalKey(),
-                    navigatorObservers: [
-                      SavedStateRouteObserver(savedState: savedState)
-                    ],
-                    initialRoute:
-                        SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
-                    routes: {
-                      '/': (context) => GameScreen(),
-                      '/settings': (context) => Settings(),
-                      '/rules': (context) => Rules(),
-                    },
-                  )
-                : Center(
-                    child: CircularProgressIndicator(),
-                  );
-
+            if (!snapshot.hasData)
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            return MaterialApp(
+              title: title,
+              theme: lightTheme,
+              darkTheme: darkTheme,
+              themeMode: ThemeMode.values[snapshot.data],
+              navigatorKey: navigatorKey,
+              navigatorObservers: [routeObserver],
+              initialRoute:
+                  SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
+              routes: {
+                '/': (context) => GameScreen(),
+                '/settings': (context) => Settings(),
+                '/rules': (context) => Rules(),
+              },
+            );
           }),
     );
   }
