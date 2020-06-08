@@ -22,9 +22,9 @@ class MainMenu extends StatelessWidget {
 
   Widget _buildRandomButton(context) {
     var game = Provider.of(context).game;
-    return raisedButton(context, "Abandon and start random game", () {
+    return pad(raisedButton(context, "Reset to another random game", () {
       game.loadGameSink.add(false);
-    });
+    }));
   }
 
   @override
@@ -56,12 +56,14 @@ class MainMenu extends StatelessWidget {
             
             _buildGamePreview(context),
 
-            clickableCard("Use large dictionary?", "Tap to see more info",
+            clickableCard("Use large dictionary?", "Tap to see more info about this option",
                 switchControl(game.useEnableDict), () {
               //TODO
             }),
-            
+
             _buildRandomButton(context),
+
+            // TODO: settings, rules, tips, support?
           ],
         ));
   }
@@ -97,6 +99,7 @@ class GamePreview extends StatelessWidget {
                 child: Card(
                   child: Column(
                     children: [
+                      pad(text("Tap to start playing this game")),
                       buildPointsRow(context),
                       LetterCollection(),
                     ],
@@ -110,10 +113,17 @@ class GamePreview extends StatelessWidget {
   }
 }
 
+Padding pad(Widget w) {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: w,
+  );
+}
+
 Text text(String text) {
   return Text(
     text,
-    style: TextStyle(fontSize: 24, color: Colors.black),
+    style: TextStyle(fontSize: 24),
   );
 }
 

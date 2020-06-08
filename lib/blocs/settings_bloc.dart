@@ -22,7 +22,7 @@ class SettingsBloc {
     //   // _reloadWordMap = true;
     // });     
 
-    theme.add(prefs.getInt("theme") ?? ThemeMode.system.index);
+    theme.add(prefs.getInt("theme") ?? ThemeMode.light.index);
     theme.listen((int theme){
       prefs.setInt("theme", theme);
     });
