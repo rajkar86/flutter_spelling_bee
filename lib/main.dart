@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:page_transition/page_transition.dart';
+// import 'package:page_transition/page_transition.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
+import 'package:spelling_bee/helpers/consts.dart';
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/pages/game.dart';
 import 'package:spelling_bee/helpers/provider.dart';
+import 'package:spelling_bee/pages/main_menu.dart';
 import 'package:spelling_bee/pages/rules.dart';
 import 'package:spelling_bee/pages/settings.dart';
 import 'package:native_state/native_state.dart';
@@ -37,15 +39,15 @@ class GameScreen extends StatelessWidget {
           builder: (context, snapshot) {
             return snapshot.hasData
                 ? scaffold(Game(), context)
-                : Center(child: CircularProgressIndicator());
+                : WAIT_WIDGET;
           });
     });
   }
 }
 
-PageTransition buildPageTransition(Widget w) {
-  return PageTransition(type: PageTransitionType.rightToLeftWithFade, child: w);
-}
+// PageTransition buildPageTransition(Widget w) {
+//   return PageTransition(type: PageTransitionType.rightToLeftWithFade, child: w);
+// }
 
 class MyApp extends StatelessWidget {
   final GameBloc gameBloc;
@@ -55,7 +57,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    var title = 'Not That Spelling Bee';
+
 
     var lightTheme = ThemeData(
       primarySwatch: Colors.yellow,
@@ -74,11 +76,9 @@ class MyApp extends StatelessWidget {
           stream: this.gameBloc.settings.theme,
           builder: (context, snapshot) {
             if (!snapshot.hasData)
-              return Center(
-                child: CircularProgressIndicator(),
-              );
+              return WAIT_WIDGET;
             return MaterialApp(
-              title: title,
+              title: GAME_TITLE,
               theme: lightTheme,
               darkTheme: darkTheme,
               themeMode: ThemeMode.values[snapshot.data],
@@ -87,7 +87,8 @@ class MyApp extends StatelessWidget {
               initialRoute:
                   SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
               routes: {
-                '/': (context) => GameScreen(),
+                '/': (context) => MainMenu(),
+                '/game': (context) => GameScreen(),
                 '/settings': (context) => Settings(),
                 '/rules': (context) => Rules(),
               },

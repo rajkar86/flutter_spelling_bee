@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spelling_bee/blocs/settings_bloc.dart';
 import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/logic.dart';
@@ -30,9 +31,6 @@ class _GameStore {
 
 class _Game {
   BehaviorSubject<String> game = BehaviorSubject<String>();
-
-  // BehaviorSubject<List<String>> answer = BehaviorSubject<List<String>>();
-
   BehaviorSubject<String> word = BehaviorSubject<String>();
 
   BehaviorSubject<SplayTreeSet<String>> words =
@@ -130,28 +128,28 @@ class GameBloc {
   GameBloc();
   
   var settings = SettingsBloc();
-  var _gameState = _Game();
+  var state = _Game();
   var _loadEnableDict = false;
 
-  // BehaviorSubject<bool> _useEnableDict = BehaviorSubject<bool>();
+  BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
+
   BehaviorSubject<Map> _wordMap = BehaviorSubject<Map>();
 
   // STREAMS
-  Stream<SplayTreeSet<String>> get foundWords => _gameState.words.stream;
+  Stream<SplayTreeSet<String>> get foundWords => state.words.stream;
 
-  Stream<String> get word => _gameState.word.stream;
-  Stream<String> get game => _gameState.game.stream;
-  Stream<Message> get message => _gameState.message.stream;
+  Stream<String> get word => state.word.stream;
+  Stream<String> get game => state.game.stream;
+  Stream<Message> get message => state.message.stream;
   // Stream<List<String>> get answer => _gameState.answer.stream;
 
-  Stream<int> get points => _gameState.points.stream;
-  Stream<int> get wordCount => _gameState.words.map((x) => x.length);
-  Stream<bool> get useEnableDict => settings.useEnableDict.stream;
+  Stream<int> get points => state.points.stream;
+  Stream<int> get wordCount => state.words.map((x) => x.length);
 
   SplayTreeSet<String> get wordsRemaining =>
-      _gameState.wordsRemaining.stream.value;
-  int get maxPoints => _gameState.maxPoints;
-  int get maxWords => _gameState.maxWords;
+      state.wordsRemaining.stream.value;
+  int get maxPoints => state.maxPoints;
+  int get maxWords => state.maxWords;
 
   final _isGameSaved = BehaviorSubject<bool>.seeded(false);
   Stream<bool> get isGameSaved => _isGameSaved.stream;
@@ -170,34 +168,42 @@ class GameBloc {
 
   Future<void> init() async {
     await settings.init(); // Do this first
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    useEnableDict.add(prefs.getBool("useEnable") ?? true);   
+    useEnableDict.listen((bool use){
+      prefs.setBool("useEnable", use);
+      _loadGameHandler(true);
+    });     
+
     await loadWordMap();
+    
     _savedGame = _GameStore.fromCache(await Assets.getGame());
     var isGameSaved = _savedGame.val().length > 0;
     _isGameSaved.add(isGameSaved);
     _loadGameHandler(isGameSaved);
 
     _loadGame.listen(_loadGameHandler);
-    _nextLetter.listen(_gameState.addLetter);
+    _nextLetter.listen(state.addLetter);
     _event.listen(_eventHandler);
   }
 
   Future<void> loadWordMap() async {
-    print(_wordMap.hasValue);
-    _loadEnableDict = settings.useEnableDict.stream.value;
+    if (_loadEnableDict == useEnableDict.stream.value) return;
+    _loadEnableDict = !_loadEnableDict;
     var wordMap = await Assets.getWordMap(_loadEnableDict);
     this._wordMap.add(wordMap);
   }
 
   void _saveGame(bool save) {
-    _savedGame = save ? _gameState.getGameStore() : null;
+    _savedGame = save ? state.getGameStore() : null;
     save ? Assets.setGame(_savedGame.val()) : Assets.removeGame();
     _isGameSaved.add(save);
   }
 
   Future<void> _loadGameHandler(bool resume) async {
-    if (_loadEnableDict != settings.useEnableDict.stream.value) {
-      await loadWordMap();
-    }
+    await loadWordMap();
     var wordMap = this._wordMap.stream.value;
     String game = _savedGame.game();
     game = (resume && Logic.isGameValid(wordMap, game))
@@ -212,7 +218,7 @@ class GameBloc {
           .toList();
     }
 
-    _gameState.reset(game, answer, foundWords);
+    state.reset(game, answer, foundWords);
     if (!resume) _saveGame(true);
   }
 
@@ -226,24 +232,24 @@ class GameBloc {
         break;
       case Event.CHECK:
         {
-          if (_gameState.check(wordMap)) _saveGame(true);
+          if (state.check(wordMap)) _saveGame(true);
         }
         break;
 
       case Event.SHUFFLE:
         {
-          _gameState.shuffle();
+          state.shuffle();
         }
         break;
 
       case Event.DELETE:
         {
-          _gameState.delete();
+          state.delete();
         }
         break;
       case Event.CLEAR:
         {
-          _gameState.clear();
+          state.clear();
         }
         break;
       default:
@@ -255,7 +261,7 @@ class GameBloc {
   }
 
   void dispose() {
-    _gameState.dispose();
+    state.dispose();
     _isGameSaved.close();
     _loadGame.close();
     _nextLetter.close();

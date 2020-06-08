@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsBloc {
 
   // Don't use BehaviorSubjects directly in clients
-  BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
+  // BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
   BehaviorSubject<int> theme = BehaviorSubject<int>();
 
   SettingsBloc();
@@ -16,11 +16,11 @@ class SettingsBloc {
     
     final SharedPreferences prefs = await SharedPreferences.getInstance();
   
-    useEnableDict.add(prefs.getBool("useEnable") ?? true);   
-    useEnableDict.listen((bool use){
-      prefs.setBool("useEnable", use);
-      // _reloadWordMap = true;
-    });     
+    // useEnableDict.add(prefs.getBool("useEnable") ?? true);   
+    // useEnableDict.listen((bool use){
+    //   prefs.setBool("useEnable", use);
+    //   // _reloadWordMap = true;
+    // });     
 
     theme.add(prefs.getInt("theme") ?? ThemeMode.system.index);
     theme.listen((int theme){
@@ -30,7 +30,7 @@ class SettingsBloc {
   }
 
   void dispose() {
-    useEnableDict.close();
+    // useEnableDict.close();
     theme.close();
   }
 }

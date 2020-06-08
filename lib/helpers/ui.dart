@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
+import 'package:spelling_bee/helpers/consts.dart';
 import 'package:spelling_bee/helpers/provider.dart';
 import 'package:spelling_bee/pages/found_words.dart';
 import 'package:spelling_bee/widgets/word_list.dart';
@@ -10,7 +11,7 @@ import 'package:spelling_bee/widgets/word_list.dart';
 AlertDialog buildMissedWordsDialog(BuildContext context) {
   var game = Provider.of(context).game;
   var words = game.wordsRemaining;
-  
+
   bool isDark = Theme.of(context).brightness == Brightness.dark;
 
   return AlertDialog(
@@ -41,7 +42,7 @@ Widget scaffold(Widget w, BuildContext context) {
       length: 2,
       child: Scaffold(
           appBar: AppBar(
-              title: Text("Not That Spelling Bee", style: TextStyle(fontSize: 18)),
+              title: Text(GAME_TITLE, style: TextStyle(fontSize: 18)),
               actions: [
                 IconButton(
                   icon: Icon(Icons.add),
@@ -82,6 +83,35 @@ Widget scaffold(Widget w, BuildContext context) {
 
 PageTransition buildPageTransition(Widget w) {
   return PageTransition(type: PageTransitionType.scale, child: w);
+}
+
+Card clickableCard(
+    String title, String subtitle, Widget control, Function() onTap) {
+  var inkWell = InkWell(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                  child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  title,
+                  style: TextStyle(fontSize: 18),
+                ),
+              )),
+              control,
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(subtitle, style: TextStyle(color: Colors.grey)),
+          ),
+        ],
+      ),
+      onTap: onTap);
+  return Card(child: inkWell);
 }
 
 // Widget wrapWillPop(Widget w, BuildContext context) {
