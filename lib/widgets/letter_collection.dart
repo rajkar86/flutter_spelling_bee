@@ -22,12 +22,12 @@ class LetterCollection extends StatelessWidget {
     double sz = 80;
 
     bool isDark = Theme.of(context).brightness == Brightness.dark;
-    var color1 =  Colors.black;
-    var color2 =  isDark ? Colors.grey : Colors.yellow;
+    var color1 =  isDark ? Colors.grey : Colors.black;
+    var color2 =  isDark ? Colors.blueGrey : Colors.yellow;
     
     Widget _button(String c, [bool center = false]) {
       var s = TextStyle(
-          color: (center ? color2 : color1), fontSize: 24);
+          color: isDark ? Colors.black : (center ? color2 : color1), fontSize: 24);
            
       return Center(
         child: Padding(

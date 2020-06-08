@@ -129,7 +129,7 @@ class GameBloc {
   
   var settings = SettingsBloc();
   var state = _Game();
-  var _loadEnableDict = false;
+  var _loadEnableDict;
 
   BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
 
@@ -172,26 +172,29 @@ class GameBloc {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     useEnableDict.add(prefs.getBool("useEnable") ?? true);   
-    useEnableDict.listen((bool use){
-      prefs.setBool("useEnable", use);
-      _loadGameHandler(true);
-    });     
+    
 
     await loadWordMap();
     
     _savedGame = _GameStore.fromCache(await Assets.getGame());
     var isGameSaved = _savedGame.val().length > 0;
     _isGameSaved.add(isGameSaved);
-    _loadGameHandler(isGameSaved);
+    // _loadGameHandler(isGameSaved);
 
+    useEnableDict.listen((bool use){
+      prefs.setBool("useEnable", use);
+      _loadGameHandler(true);
+    });     
     _loadGame.listen(_loadGameHandler);
     _nextLetter.listen(state.addLetter);
     _event.listen(_eventHandler);
+
+    
   }
 
   Future<void> loadWordMap() async {
     if (_loadEnableDict == useEnableDict.stream.value) return;
-    _loadEnableDict = !_loadEnableDict;
+    _loadEnableDict = useEnableDict.stream.value;
     var wordMap = await Assets.getWordMap(_loadEnableDict);
     this._wordMap.add(wordMap);
   }
@@ -205,7 +208,9 @@ class GameBloc {
   Future<void> _loadGameHandler(bool resume) async {
     await loadWordMap();
     var wordMap = this._wordMap.stream.value;
-    String game = _savedGame.game();
+   
+    String game = _savedGame != null ? _savedGame.game() : Logic.randomGame(wordMap);
+
     game = (resume && Logic.isGameValid(wordMap, game))
         ? game
         : Logic.randomGame(wordMap);

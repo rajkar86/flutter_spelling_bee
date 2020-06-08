@@ -20,11 +20,28 @@ class MainMenu extends StatelessWidget {
         });
   }
 
-  Widget _buildRandomButton(context) {
+  Widget _buildRandomGameButton(context) {
     var game = Provider.of(context).game;
-    return pad(raisedButton(context, "Reset to another random game", () {
+    return pad(raisedButton(context, "Reset to a random game", () {
       game.loadGameSink.add(false);
     }));
+  }
+
+  Widget _largeDictionaryInfoDialog(context) {
+    return AlertDialog(
+        title: text("Use large dictionary"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Note that English vocabulary lists of a reasonable size are necessarily subjective.\n"),
+            Text("Selecting the large dictionary will result in more words being accepted, " +
+                "but will also require you to find more words that you might consider obscure.\n"),
+            Text("Using the smaller dictionary will require fewer words to be found, " +
+                "but might not include some words that you might consider common.\n"),
+            Text("The larger dictionary is the Enable2k wordlist used in popular games like Words With Friends." +
+                "The smaller dictionary is the one named 2of12inf in the 12dicts collection by Alan Beale.\n"),
+          ],
+        ));
   }
 
   @override
@@ -51,19 +68,21 @@ class MainMenu extends StatelessWidget {
           ),
         ]),
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            
             _buildGamePreview(context),
 
-            clickableCard("Use large dictionary?", "Tap to see more info about this option",
+            clickableCard(
+                "Use large dictionary?",
+                "Tap to see more info about this option",
                 switchControl(game.useEnableDict), () {
-              //TODO
+              showDialog(context: context, builder: _largeDictionaryInfoDialog);
             }),
 
-            _buildRandomButton(context),
-
+            _buildRandomGameButton(context),
+            // _buildCustomGameButton(context), TODO ??
             // TODO: settings, rules, tips, support?
+            // TODO: dark mode could be better
           ],
         ));
   }
@@ -91,6 +110,8 @@ class GamePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var gameState = Provider.of(context).game.state;
+
     return Column(
       children: [
         InkWell(
@@ -99,7 +120,14 @@ class GamePreview extends StatelessWidget {
                 child: Card(
                   child: Column(
                     children: [
-                      pad(text("Tap to start playing this game")),
+                      StreamBuilder(
+                          stream: gameState.points.stream,
+                          initialData: 0,
+                          builder: (context, snapshot) {
+                            var verb = snapshot.data > 0 ? "resume" : "start";
+                            return pad(
+                                text("Tap to " + verb + " playing this game"));
+                          }),
                       buildPointsRow(context),
                       LetterCollection(),
                     ],
@@ -129,10 +157,10 @@ Text text(String text) {
 
 RaisedButton raisedButton(
     BuildContext context, String title, Function onPressed) {
-  bool isDark = Theme.of(context).brightness == Brightness.dark;
+  // bool isDark = Theme.of(context).brightness == Brightness.dark;
 
   return RaisedButton(
-      color: isDark ? Colors.grey : Colors.yellow,
+      // color: Colors.yellow,
       child: text(title),
       onPressed: onPressed);
 }

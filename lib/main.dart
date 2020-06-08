@@ -37,9 +37,7 @@ class GameScreen extends StatelessWidget {
       return StreamBuilder<Object>(
           stream: Provider.of(context).game.game,
           builder: (context, snapshot) {
-            return snapshot.hasData
-                ? scaffold(Game(), context)
-                : WAIT_WIDGET;
+            return snapshot.hasData ? scaffold(Game(), context) : WAIT_WIDGET;
           });
     });
   }
@@ -57,14 +55,31 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
-
     var lightTheme = ThemeData(
       primarySwatch: Colors.yellow,
       brightness: Brightness.light,
+      indicatorColor: Colors.black,
     );
 
-    var darkTheme = ThemeData.dark();
+    var darkTheme = ThemeData(
+        // primaryColor: Colors.black,
+        // buttonColor: Colors.blueGrey,
+        textTheme: TextTheme(
+            bodyText1: TextStyle(color: Colors.grey),
+            bodyText2: TextStyle(color: Colors.grey)),
+        accentColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.blueGrey),
+        buttonTheme: ButtonThemeData(
+            buttonColor: Colors.blueGrey, textTheme: ButtonTextTheme.accent),
+        primarySwatch: Colors.blueGrey,
+        indicatorColor: Colors.blueGrey,
+        // backgroundColor: Colors.black ,
+        toggleableActiveColor: Colors.blueGrey,
+        canvasColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
+        cardTheme: CardTheme(
+            color: Colors.black, shadowColor: Colors.blueGrey, elevation: 9),
+        brightness: Brightness.dark);
 
     var navigatorKey = GlobalKey<NavigatorState>();
     var savedState = SavedState.of(context);
@@ -75,8 +90,7 @@ class MyApp extends StatelessWidget {
       child: StreamBuilder(
           stream: this.gameBloc.settings.theme,
           builder: (context, snapshot) {
-            if (!snapshot.hasData)
-              return WAIT_WIDGET;
+            if (!snapshot.hasData) return WAIT_WIDGET;
             return MaterialApp(
               title: GAME_TITLE,
               theme: lightTheme,

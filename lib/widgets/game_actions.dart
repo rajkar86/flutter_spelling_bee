@@ -23,7 +23,9 @@ class GameActions extends StatelessWidget {
         FlatButton(
           // iconSize: SIZE,
           child: Column(
-            children: <Widget>[Icon(i, size: SIZE),Text(t)],
+            children: <Widget>[
+              Icon(i, size: SIZE, color: Theme.of(context).iconTheme.color),
+            Text(t, style: TextStyle(color: Theme.of(context).textTheme.bodyText1.color))],
           ),
           color: Colors.transparent,
           // splashColor: Colors.grey,
