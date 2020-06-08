@@ -24,9 +24,9 @@ class Logic {
         : "Not a word";
   }
 
-  static bool isValidProvider(String word, String letters) {
-    return (word.length >= 4) && (word.contains(letters[0]));
-  }
+  // static bool isValidProvider(String word, String letters) {
+  //   return (word.length >= 4) && (word.contains(letters[0]));
+  // }
 
   static bool isCorrectProvider(String checkStatus) {
     return checkStatus == "";

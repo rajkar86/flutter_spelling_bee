@@ -7,6 +7,7 @@ import 'package:spelling_bee/helpers/provider.dart';
 import 'package:spelling_bee/widgets/game_actions.dart';
 import 'package:spelling_bee/widgets/current_word.dart';
 import 'package:spelling_bee/widgets/letter_collection.dart';
+import 'package:spelling_bee/widgets/star_rating.dart';
 
 import 'package:spelling_bee/widgets/tally.dart';
 
@@ -16,18 +17,18 @@ class Game extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Center(
-                  child: ListView(shrinkWrap: true, children: <Widget>[
-                _buildPointsRow(context),
-                _buildKeyPad(context),
-                _buildActions()
-              ])),
-            ),
-          ],
-        );
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child: Center(
+              child: ListView(shrinkWrap: true, children: <Widget>[
+            _buildPointsRow(context),
+            _buildKeyPad(context),
+            _buildActions()
+          ])),
+        ),
+      ],
+    );
   }
 
   Widget _buildPointsRow(BuildContext context) {
@@ -36,6 +37,7 @@ class Game extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         _buildPointDisplay(context, g.wordCount, g.maxWords, "word(s)"),
+        StarRating(),
         _buildPointDisplay(context, g.points, g.maxPoints, "point(s)"),
       ],
     );

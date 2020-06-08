@@ -11,17 +11,17 @@ class Settings extends StatelessWidget {
   const Settings({Key key}) : super(key: key);
 
   Widget _settings(context) {
-    var game = Provider.of(context).game;
-    var useEnableDict = game.settings.useEnableDict;
-    var theme = game.settings.theme;
+    var settings = Provider.of(context).game.settings;
 
     return Column(
       children: [
-        _setting("Theme", themeString(ThemeMode.values[theme.stream.value]),
+        _setting(
+            "Theme",
+            themeString(ThemeMode.values[settings.theme.stream.value]),
             Container(), () {
           showDialog(
               context: context,
-              builder: (context) => _optionsDialog(context, theme));
+              builder: (context) => _optionsDialog(context, settings.theme));
         }),
         _setting(
             "Use large dictionary",
@@ -29,8 +29,8 @@ class Settings extends StatelessWidget {
                 "Using this dictionary, which is larger than the default option, will result in the game accepting more words as valid, " +
                 "but will also require you to find a lot more words." +
                 "Note that changes take place when you start a new game or on full restart of the app.",
-            switchControl(useEnableDict), () {
-          useEnableDict.sink.add(!useEnableDict.stream.value);
+            switchControl(settings.useEnableDict), () {
+          settings.useEnableDict.sink.add(!settings.useEnableDict.stream.value);
         })
       ],
     );
@@ -46,12 +46,12 @@ class Settings extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                  title,
-                  style: TextStyle(fontSize: 18),
-                ),
-                    )),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    title,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                )),
                 control,
               ],
             ),
@@ -82,11 +82,11 @@ class Settings extends StatelessWidget {
     );
   }
 
-  // TODO make this generic
-  AlertDialog _optionsDialog(BuildContext context, BehaviorSubject<int> choice) {
-    return AlertDialog(
-      title: Text("Theme"),
-      content: StreamBuilder(
+  // TODO make this generic,
+  // Maybe a collection Widgets that respond to to BehaviorSubject-s
+  Widget _optionsDialog(BuildContext context, BehaviorSubject<int> choice) {
+    return SimpleDialog(title: Text("Theme"), children: [
+      StreamBuilder(
           stream: choice.stream,
           builder: (context, snapshot) {
             return snapshot.hasData
@@ -106,9 +106,8 @@ class Settings extends StatelessWidget {
                 : Center(
                     child: CircularProgressIndicator(),
                   );
-          }),
-      // actions:
-    );
+          })
+    ]);
   }
 
   @override
