@@ -41,7 +41,6 @@ class Game extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 2.0),
             child: LetterCollection(),
           ),
-          // LetterCollection(letters: , onPressed: _nextLetterHandler),
         ],
       ),
     );

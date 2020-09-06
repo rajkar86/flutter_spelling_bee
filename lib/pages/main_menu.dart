@@ -22,7 +22,7 @@ class MainMenu extends StatelessWidget {
 
   Widget _buildRandomGameButton(context) {
     var game = Provider.of(context).game;
-    return pad(raisedButton(context, "Reset to a random game", () {
+    return pad(raisedButton(context, "Reset and load new board", () {
       game.loadGameSink.add(false);
     }));
   }
@@ -33,11 +33,13 @@ class MainMenu extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Note that English vocabulary lists of a reasonable size are necessarily subjective.\n"),
+            Text(
+                "Note that English vocabulary lists of a reasonable size are necessarily subjective.\n"),
             Text("Selecting the large dictionary will result in more words being accepted, " +
                 "but will also require you to find more words that you might consider obscure.\n"),
-            Text("Using the smaller dictionary will require fewer words to be found, " +
-                "but might not include some words that you might consider common.\n"),
+            Text(
+                "Using the smaller dictionary will require fewer words to be found, " +
+                    "but result in some common words not being accepted.\n"),
             Text("The larger dictionary is the Enable2k wordlist used in popular games like Words With Friends." +
                 "The smaller dictionary is the one named 2of12inf in the 12dicts collection by Alan Beale.\n"),
           ],
@@ -125,8 +127,8 @@ class GamePreview extends StatelessWidget {
                           initialData: 0,
                           builder: (context, snapshot) {
                             var verb = snapshot.data > 0 ? "resume" : "start";
-                            return pad(
-                                text("Tap to " + verb + " playing this game"));
+                            return pad(text(
+                                "Tap here to " + verb + " playing this game"));
                           }),
                       buildPointsRow(context),
                       LetterCollection(),
@@ -151,7 +153,7 @@ Padding pad(Widget w) {
 Text text(String text) {
   return Text(
     text,
-    style: TextStyle(fontSize: 24),
+    style: TextStyle(fontSize: 22),
   );
 }
 

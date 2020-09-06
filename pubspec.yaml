@@ -1,5 +1,5 @@
 name: spelling_bee
-description: A new Flutter project.
+description: Not that Spelling Bee game
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -12,7 +12,7 @@ description: A new Flutter project.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # flutter build appbundle
-version: 1.0.1+18
+version: 1.0.1+20
 
 environment:
   sdk: ">=2.2.0 <3.0.0"

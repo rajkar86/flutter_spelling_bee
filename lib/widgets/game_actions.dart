@@ -3,37 +3,39 @@ import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/provider.dart';
 
 class GameActions extends StatelessWidget {
-  const GameActions({Key key})
-      : super(key: key);
+  const GameActions({Key key}) : super(key: key);
 
   // final VoidCallback clear;
   // final VoidCallback refresh;
   // final VoidCallback submit;
 
-  static const double SIZE=36;
+  static const double SIZE = 36;
 
   @override
   Widget build(BuildContext context) {
-    
     //bool isDark = MediaQuery.of(context).platformBrightness == Brightness.light; //TODO change
 
     Widget _icon(IconData i, String t, Event e) {
-    return Column(
-      children: <Widget>[
-        FlatButton(
-          // iconSize: SIZE,
-          child: Column(
-            children: <Widget>[
-              Icon(i, size: SIZE, color: Theme.of(context).iconTheme.color),
-            Text(t, style: TextStyle(color: Theme.of(context).textTheme.bodyText1.color))],
+      return Column(
+        children: <Widget>[
+          FlatButton(
+            // iconSize: SIZE,
+            child: Column(
+              children: <Widget>[
+                Icon(i, size: SIZE, color: Theme.of(context).iconTheme.color),
+                Text(t,
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyText1.color))
+              ],
+            ),
+            color: Colors.transparent,
+            // splashColor: Colors.grey,
+            onPressed: () => Provider.of(context).game.eventSink.add(e),
           ),
-          color: Colors.transparent,
-          // splashColor: Colors.grey,
-          onPressed: () => Provider.of(context).game.eventSink.add(e),
-        ),
-      ],
-    );
-  }
+        ],
+      );
+    }
+
     return Ink(
       // padding: const EdgeInsets.only(bottom: SIZE*1.5),
       child: Row(

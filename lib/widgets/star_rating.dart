@@ -21,10 +21,9 @@ class StarRating extends StatelessWidget {
       builder: (context, snapshot) {
 
         var ratio = snapshot.data/game.maxPoints;
-        int stars = min(5,((ratio - 0.07)/.12).ceil());
-        stars += 3;
+        int stars = min(5,((ratio - 0.06)/0.11).ceil());
 
-        var pointsToNextStar = ((0.07 + .12*stars)*game.maxPoints).ceil();
+        var pointsToNextStar = ((0.06 + 0.11*stars)*game.maxPoints).ceil();
         var text = "Level up at " + pointsToNextStar.toString() +  " points";
         if (stars == 5) text = "Max level acheived!";
 
