@@ -12,7 +12,7 @@ description: Not that Spelling Bee game
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # flutter build appbundle
-version: 1.0.1+19
+version: 1.0.1+21
 
 environment:
   sdk: ">=2.2.0 <3.0.0"

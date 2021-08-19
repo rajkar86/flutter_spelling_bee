@@ -42,6 +42,8 @@ class MainMenu extends StatelessWidget {
                     "but result in some common words not being accepted.\n"),
             Text("The larger dictionary is the Enable2k wordlist used in popular games like Words With Friends." +
                 "The smaller dictionary is the one named 2of12inf in the 12dicts collection by Alan Beale.\n"),
+            Text(
+                "Note that changing dictionaries can reset the game as not all games are valid games in both dictionaries.\n"),
           ],
         ));
   }
@@ -76,7 +78,7 @@ class MainMenu extends StatelessWidget {
 
             clickableCard(
                 "Use large dictionary?",
-                "Tap to see more info about this option",
+                "Changing dictionaries might reset the game. \nTap to view more info about this setting.",
                 switchControl(game.useEnableDict), () {
               showDialog(context: context, builder: _largeDictionaryInfoDialog);
             }),

@@ -33,14 +33,11 @@ class _Game {
   BehaviorSubject<String> game = BehaviorSubject<String>();
   BehaviorSubject<String> word = BehaviorSubject<String>();
 
-  BehaviorSubject<SplayTreeSet<String>> words =
-      BehaviorSubject<SplayTreeSet<String>>();
+  BehaviorSubject<SplayTreeSet<String>> words = BehaviorSubject<SplayTreeSet<String>>();
 
-  BehaviorSubject<SplayTreeSet<String>> wordsRemaining =
-      BehaviorSubject<SplayTreeSet<String>>();
+  BehaviorSubject<SplayTreeSet<String>> wordsRemaining = BehaviorSubject<SplayTreeSet<String>>();
 
-  BehaviorSubject<Message> message =
-      BehaviorSubject<Message>.seeded(Message(""));
+  BehaviorSubject<Message> message = BehaviorSubject<Message>.seeded(Message(""));
 
   BehaviorSubject<int> points = BehaviorSubject<int>();
 
@@ -49,8 +46,7 @@ class _Game {
   // Sink<Message> messageSink;
   //Logic.answer(wordMap, game)
 
-  void reset(String game, List<String> answer,
-      [List<String> wordList = const []]) {
+  void reset(String game, List<String> answer, [List<String> wordList = const []]) {
     var words = SplayTreeSet<String>.from(wordList);
     var wordsRemaining = SplayTreeSet<String>.from(answer).difference(words);
     this.game.add(game);
@@ -74,8 +70,7 @@ class _Game {
   }
 
   void delete() {
-    if (word.value.length >= 1)
-      _setWord(word.value.substring(0, word.value.length - 1));
+    if (word.value.length >= 1) _setWord(word.value.substring(0, word.value.length - 1));
   }
 
   void clear() => _setWord("");
@@ -204,19 +199,15 @@ class GameBloc {
     await loadWordMap();
     var wordMap = this._wordMap.stream.value;
 
-    String game =
-        _savedGame != null ? _savedGame.game() : Logic.randomGame(wordMap);
+    String game = _savedGame != null ? _savedGame.game() : Logic.randomGame(wordMap);
 
-    game = (resume && (game != null) && Logic.isGameValid(wordMap, game))
-        ? game
-        : Logic.randomGame(wordMap);
+    game = (resume && (game != null) && Logic.isGameValid(wordMap, game)) ? game : Logic.randomGame(wordMap);
     var answer = Logic.answer(wordMap, game);
 
-    List<String> foundWords = List<String>();
+    List<String> foundWords = <String>[];
     if (resume) {
-      foundWords = SplayTreeSet<String>.from(_savedGame.foundWords())
-          .intersection(SplayTreeSet<String>.from(answer))
-          .toList();
+      foundWords =
+          SplayTreeSet<String>.from(_savedGame.foundWords()).intersection(SplayTreeSet<String>.from(answer)).toList();
     }
 
     state.reset(game, answer, foundWords);

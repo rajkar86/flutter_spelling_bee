@@ -41,8 +41,7 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(4.0),
-              child: Text("0",
-                  style: TextStyle(fontSize: 12)),
+              child: Text("0", style: TextStyle(fontSize: 12)),
             ),
             Container(
               width: 50,
@@ -51,7 +50,8 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
               child: LinearProgressIndicator(
                 // backgroundColor: Colors.black,
                 value: !percent.isFinite ? 0 : percent,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).indicatorColor),
               ),
             ),
             Padding(
