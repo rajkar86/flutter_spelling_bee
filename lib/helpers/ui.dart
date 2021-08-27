@@ -21,8 +21,8 @@ AlertDialog buildMissedWordsDialog(BuildContext context) {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            RaisedButton(
-              color: isDark ? Colors.grey : Colors.yellow,
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: isDark ? Colors.grey : Colors.yellow),
               child: Text(
                 'Proceed to new game',
                 style: TextStyle(color: Colors.black),
@@ -48,9 +48,7 @@ Widget scaffold(Widget w, BuildContext context) {
                   icon: Icon(Icons.add),
                   tooltip: "New Game",
                   onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => buildMissedWordsDialog(context));
+                    showDialog(context: context, builder: (context) => buildMissedWordsDialog(context));
                   },
                 ),
                 IconButton(
@@ -85,8 +83,7 @@ PageTransition buildPageTransition(Widget w) {
   return PageTransition(type: PageTransitionType.scale, child: w);
 }
 
-Card clickableCard(
-    String title, String subtitle, Widget control, Function() onTap) {
+Card clickableCard(String title, String subtitle, Widget control, Function() onTap) {
   var inkWell = InkWell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,19 +129,18 @@ Card clickableCard(
 //   return WillPopScope(onWillPop: _onWillPop, child: w);
 // }
 
-void dialog(BuildContext context, String title, String content,
-    VoidCallback yes, VoidCallback no) {
+void dialog(BuildContext context, String title, String content, VoidCallback yes, VoidCallback no) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: Text(title),
       content: Text(content),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text('No'),
           onPressed: no,
         ),
-        FlatButton(
+        TextButton(
           child: Text('Yes'),
           onPressed: yes,
         ),

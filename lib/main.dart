@@ -20,8 +20,7 @@ Future main() async {
   await gameBloc.init();
 
   // debugPaintSizeEnabled = true;
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((_) {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
     runApp(SavedState(child: MyApp(gameBloc: gameBloc)));
   });
 }
@@ -64,21 +63,17 @@ class MyApp extends StatelessWidget {
     var darkTheme = ThemeData(
         // primaryColor: Colors.black,
         // buttonColor: Colors.blueGrey,
-        textTheme: TextTheme(
-            bodyText1: TextStyle(color: Colors.grey),
-            bodyText2: TextStyle(color: Colors.grey)),
-        accentColor: Colors.black,
+        textTheme: TextTheme(bodyText1: TextStyle(color: Colors.grey), bodyText2: TextStyle(color: Colors.grey)),
+        // colorScheme: ColorScheme(secondary: Colors.black),
         iconTheme: IconThemeData(color: Colors.blueGrey),
-        buttonTheme: ButtonThemeData(
-            buttonColor: Colors.blueGrey, textTheme: ButtonTextTheme.accent),
+        buttonTheme: ButtonThemeData(buttonColor: Colors.blueGrey, textTheme: ButtonTextTheme.accent),
         primarySwatch: Colors.blueGrey,
         indicatorColor: Colors.blueGrey,
         // backgroundColor: Colors.black ,
         toggleableActiveColor: Colors.blueGrey,
         canvasColor: Colors.black,
         scaffoldBackgroundColor: Colors.black,
-        cardTheme: CardTheme(
-            color: Colors.black, shadowColor: Colors.blueGrey, elevation: 9),
+        cardTheme: CardTheme(color: Colors.black, shadowColor: Colors.blueGrey, elevation: 9),
         brightness: Brightness.dark);
 
     var navigatorKey = GlobalKey<NavigatorState>();
@@ -98,8 +93,7 @@ class MyApp extends StatelessWidget {
               themeMode: ThemeMode.values[snapshot.data],
               navigatorKey: navigatorKey,
               navigatorObservers: [routeObserver],
-              initialRoute:
-                  SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
+              initialRoute: SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
               routes: {
                 '/': (context) => MainMenu(),
                 '/game': (context) => GameScreen(),

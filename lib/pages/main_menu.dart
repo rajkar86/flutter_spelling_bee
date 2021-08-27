@@ -33,13 +33,11 @@ class MainMenu extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-                "Note that English vocabulary lists of a reasonable size are necessarily subjective.\n"),
+            Text("Note that English vocabulary lists of a reasonable size are necessarily subjective.\n"),
             Text("Selecting the large dictionary will result in more words being accepted, " +
                 "but will also require you to find more words that you might consider obscure.\n"),
-            Text(
-                "Using the smaller dictionary will require fewer words to be found, " +
-                    "but result in some common words not being accepted.\n"),
+            Text("Using the smaller dictionary will require fewer words to be found, " +
+                "but result in some common words not being accepted.\n"),
             Text("The larger dictionary is the Enable2k wordlist used in popular games like Words With Friends." +
                 "The smaller dictionary is the one named 2of12inf in the 12dicts collection by Alan Beale.\n"),
             Text(
@@ -129,8 +127,7 @@ class GamePreview extends StatelessWidget {
                           initialData: 0,
                           builder: (context, snapshot) {
                             var verb = snapshot.data > 0 ? "resume" : "start";
-                            return pad(text(
-                                "Tap here to " + verb + " playing this game"));
+                            return pad(text("Tap here to " + verb + " playing this game"));
                           }),
                       buildPointsRow(context),
                       LetterCollection(),
@@ -159,12 +156,13 @@ Text text(String text) {
   );
 }
 
-RaisedButton raisedButton(
-    BuildContext context, String title, Function onPressed) {
+ElevatedButton raisedButton(BuildContext context, String title, Function onPressed) {
   // bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-  return RaisedButton(
-      // color: Colors.yellow,
+  return ElevatedButton(
       child: text(title),
-      onPressed: onPressed);
+      onPressed: onPressed,
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+      ));
 }

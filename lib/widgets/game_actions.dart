@@ -18,17 +18,15 @@ class GameActions extends StatelessWidget {
     Widget _icon(IconData i, String t, Event e) {
       return Column(
         children: <Widget>[
-          FlatButton(
+          TextButton(
             // iconSize: SIZE,
             child: Column(
               children: <Widget>[
                 Icon(i, size: SIZE, color: Theme.of(context).iconTheme.color),
-                Text(t,
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyText1.color))
+                Text(t, style: TextStyle(color: Theme.of(context).textTheme.bodyText1.color))
               ],
             ),
-            color: Colors.transparent,
+            // color: Colors.transparent,
             // splashColor: Colors.grey,
             onPressed: () => Provider.of(context).game.eventSink.add(e),
           ),
