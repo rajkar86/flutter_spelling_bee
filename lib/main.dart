@@ -76,13 +76,10 @@ class MyApp extends StatelessWidget {
     );
 
     final darkTheme = ThemeData(
-        // primaryColor: Colors.black,
-        // buttonColor: Colors.blueGrey,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: Colors.grey), 
           bodyMedium: TextStyle(color: Colors.grey),
         ),
-        // colorScheme: ColorScheme(secondary: Colors.black),
         iconTheme: const IconThemeData(color: Colors.blueGrey),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -91,7 +88,6 @@ class MyApp extends StatelessWidget {
         ),
         primarySwatch: Colors.blueGrey,
         indicatorColor: Colors.blueGrey,
-        // backgroundColor: Colors.black ,
         canvasColor: Colors.black,
         scaffoldBackgroundColor: Colors.black,
         cardTheme: const CardTheme(color: Colors.black, shadowColor: Colors.blueGrey, elevation: 9),
@@ -104,16 +100,15 @@ class MyApp extends StatelessWidget {
       value: gameBloc,
       child: StreamBuilder<int>(
           stream: gameBloc.settings.theme,
+          initialData: 0,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
+            final themeMode = snapshot.hasData ? ThemeMode.values[snapshot.data!] : ThemeMode.system;
             
             return MaterialApp(
               title: gameTitle,
               theme: lightTheme,
               darkTheme: darkTheme,
-              themeMode: ThemeMode.values[snapshot.data!],
+              themeMode: themeMode,
               navigatorKey: navigatorKey,
               initialRoute: initialRoute,
               routes: {
@@ -122,7 +117,6 @@ class MyApp extends StatelessWidget {
                 '/settings': (context) => const Settings(),
                 '/rules': (context) => const Rules(),
               },
-              // Save route when navigating
               navigatorObservers: [
                 _RouteObserver(
                   onRouteChanged: (String route) async {

@@ -20,6 +20,7 @@ class Message {
 /// Types of messages that can be displayed to the user
 enum MessageType { pangram, found, invalid, notCenter, short, duplicate }
 
+/// Stores game state for saving/loading
 class GameStore {
   final List<String> _val;
 
@@ -34,6 +35,7 @@ class GameStore {
   List<String> val() => _val;
 }
 
+/// Represents the state of the game
 class GameState {
   final BehaviorSubject<String> game = BehaviorSubject<String>();
   final BehaviorSubject<String> word = BehaviorSubject<String>();
@@ -167,29 +169,43 @@ class GameBloc {
   GameStore? _savedGame;
 
   Future<void> init() async {
-    await settings.init(); // Do this first
+    try {
+      await settings.init(); // Do this first
 
-    // Get dictionary preference
-    final useEnable = await StorageService.getUseEnableDict();
-    useEnableDict.add(useEnable);
+      // Get dictionary preference
+      final useEnable = await StorageService.getUseEnableDict();
+      useEnableDict.add(useEnable);
 
-    await loadWordMap();
+      await loadWordMap();
 
-    // Load saved game if it exists
-    final savedGameData = await Assets.getGame();
-    _savedGame = GameStore.fromCache(savedGameData);
-    final isGameSaved = _savedGame != null && _savedGame!.val().isNotEmpty;
-    _isGameSaved.add(isGameSaved);
+      // Load saved game if it exists
+      final savedGameData = await Assets.getGame();
+      _savedGame = GameStore.fromCache(savedGameData);
+      final isGameSaved = _savedGame != null && _savedGame!.val().isNotEmpty;
+      _isGameSaved.add(isGameSaved);
 
-    // Listen for dictionary preference changes
-    useEnableDict.listen((bool use) async {
-      await StorageService.setUseEnableDict(use);
-      _loadGameHandler(true);
-    });
-    
-    _loadGame.listen(_loadGameHandler);
-    _nextLetter.listen(state.addLetter);
-    _event.listen(_eventHandler);
+      // Listen for dictionary preference changes
+      useEnableDict.listen((bool use) async {
+        await StorageService.setUseEnableDict(use);
+        _loadGameHandler(true);
+      });
+      
+      _loadGame.listen(_loadGameHandler);
+      _nextLetter.listen(state.addLetter);
+      _event.listen(_eventHandler);
+      
+      // Force initial game load if there's no saved game
+      if (!isGameSaved) {
+        await _loadGameHandler(false);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error initializing GameBloc: $e');
+      }
+      // Add a default empty game to prevent loading forever
+      _isGameSaved.add(false);
+      state.reset('abcdefg', [''], []);
+    }
   }
 
   Future<void> loadWordMap() async {

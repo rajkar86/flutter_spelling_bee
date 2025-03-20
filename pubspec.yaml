@@ -27,7 +27,7 @@ dependencies:
   page_transition: ^2.0.9
   trotter: ^2.0.0
   shared_preferences: ^2.1.0
-  rxdart: ^0.27.7
+  rxdart: ^0.28.0
   # Using the official provider package instead of custom provider
   provider: ^6.0.5
   # Replacing polygon_clipper with a null-safe alternative
@@ -39,10 +39,10 @@ dependencies:
   flutter_polygon: ^0.3.0+2
   
 dev_dependencies:
-  flutter_launcher_icons: "^0.12.0"
+  flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.3
+  flutter_lints: ^5.0.0
 
 # Enable null safety for all packages
 # This is needed for packages that haven't migrated to null safety yet
