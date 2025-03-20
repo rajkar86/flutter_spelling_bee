@@ -6,14 +6,14 @@ class Tally extends ImplicitlyAnimatedWidget {
   final String text;
   // static const Duration(seconds: 1);
 
-  Tally(
-      {Key key,
-      @required this.points,
-      @required this.max,
-      @required this.text,
-      Duration duration = const Duration(milliseconds: 450),
-      Curve curve = Curves.linear})
-      : super(duration: duration, curve: curve, key: key);
+  const Tally({
+    Key? key,
+    required this.points,
+    required this.max,
+    required this.text,
+    Duration duration = const Duration(milliseconds: 450),
+    Curve curve = Curves.linear,
+  }) : super(duration: duration, curve: curve, key: key);
 
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState() =>
@@ -21,26 +21,25 @@ class Tally extends ImplicitlyAnimatedWidget {
 }
 
 class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
-  IntTween _points;
+  late IntTween _points;
 
   @override
   Widget build(BuildContext context) {
-    var points = _points.evaluate(animation);
-    var width = 3;
-    var percent = points / widget.max;
+    final points = _points.evaluate(animation);
+    const width = 3;
+    final percent = points / widget.max;
     return Column(
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(points.toString().padLeft(width, " ") + " " + widget.text,
-              // widget.max.toString(),
-              style: TextStyle(fontSize: 21)),
+          child: Text("${points.toString().padLeft(width, " ")} ${widget.text}",
+              style: const TextStyle(fontSize: 21)),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(4.0),
+            const Padding(
+              padding: EdgeInsets.all(4.0),
               child: Text("0", style: TextStyle(fontSize: 12)),
             ),
             Container(
@@ -56,8 +55,8 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
             ),
             Padding(
               padding: const EdgeInsets.all(4.0),
-              child: Text(widget.max.toString() + "",
-                  style: TextStyle(fontSize: 12)),
+              child: Text("${widget.max}",
+                  style: const TextStyle(fontSize: 12)),
             )
           ],
         ),
@@ -66,8 +65,10 @@ class _AnimatedCountState extends AnimatedWidgetBaseState<Tally> {
   }
 
   @override
-  void forEachTween(TweenVisitor visitor) {
+  void forEachTween(TweenVisitor<dynamic> visitor) {
     _points = visitor(
-        _points, widget.points, (dynamic value) => new IntTween(begin: value));
+        _points,
+        widget.points,
+        (dynamic value) => IntTween(begin: value as int)) as IntTween;
   }
 }

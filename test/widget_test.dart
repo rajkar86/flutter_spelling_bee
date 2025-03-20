@@ -5,26 +5,26 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Basic app test', (WidgetTester tester) async {
+    // Create a GameBloc for testing
+    final gameBloc = GameBloc();
+    await gameBloc.init();
+    
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(
+      MyApp(
+        gameBloc: gameBloc,
+        initialRoute: '/',
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Add your test assertions here
+    // For example, verify that the initial screen shows
+    expect(find.text('SPELLING BEE'), findsOneWidget);
   });
 }

@@ -4,7 +4,7 @@ import 'dart:math';
 import "package:trotter/trotter.dart";
 
 class Logic {
-  static const int MAX_WORD_LENGTH = 17;
+  static const int kMaxWordLength = 17;
 
   static String sortWord(String word) {
     var list = word.split("");
@@ -15,7 +15,7 @@ class Logic {
   static String check(
       String word, String game, SplayTreeSet<String> foundWords, Map wordMap) {
     if (foundWords.contains(word)) return "Word already found";
-    if (word.length == 0) return "Enter a word first!";
+    if (word.isEmpty) return "Enter a word first!";
     if (word.length < 4) return "Word too short!";
     if (!(word.contains(game[0]))) return "Does not contain center letter!";
     var key = sortWord(word);
@@ -33,7 +33,7 @@ class Logic {
   }
 
   static String sampleSuccessMessage() {
-    var m = [
+    var messages = [
       "Nice!",
       "Good job!",
       "Excellent!",
@@ -41,18 +41,18 @@ class Logic {
       "Terrific!",
       "Brilliant!"
     ];
-    var r = new Random();
-    return m[r.nextInt(m.length)];
+    var random = Random();
+    return messages[random.nextInt(messages.length)];
   }
 
   static String randomGame(Map wordMap) {
     // return "TAENHIR";
     var games = wordMap.keys.where((x) => x.length == 7).toList();
-    final _random = new Random();
-    var game = games[_random.nextInt(games.length)].toString();
-    var pos = _random.nextInt(7);
+    final random = Random();
+    var game = games[random.nextInt(games.length)].toString();
+    var pos = random.nextInt(7);
     return game.substring(pos, pos + 1) +
-        game.substring(0, max(0, pos)) +
+        game.substring(0, pos) +
         game.substring(pos + 1, 7);
   }
 
@@ -75,9 +75,7 @@ class Logic {
   // Assuming word is already valid for the game
   static bool isPangram(String word, String game) {
     return Set<String>.from(game.split(""))
-            .difference(Set<String>.from(word.split("")))
-            .length ==
-        0;
+            .difference(Set<String>.from(word.split(""))).isEmpty;
   }
 
   // Assuming word is already valid for the game
@@ -87,27 +85,25 @@ class Logic {
   }
 
   static List<String> answer(Map wordMap, String game) {
-    if (game == null) return [];
-
     var sub = Subsets(game.substring(1).split(""))();
+    var ans = <dynamic>[];
 
-    var ans = [];
-
-    void solveSubGame(List g) {
-      g.add(game[0]);
-      var key = sortWord(g.join());
+    for (var g in sub) {
+      var gameLetters = List<String>.from(g);
+      gameLetters.add(game[0]);
+      var key = sortWord(gameLetters.join());
       var val = wordMap[key];
       if (val != null) ans.addAll(val);
     }
-
-    sub.forEach((g) => {solveSubGame(g)});
 
     return List<String>.from(ans);
   }
 
   static int pointsForAns(List ans, String game) {
     var total = 0;
-    ans.forEach((w) => {total += points(w, game)});
+    for (var word in ans) {
+      total += points(word, game);
+    }
     return total;
   }
 

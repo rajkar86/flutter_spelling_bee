@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
-import 'package:spelling_bee/helpers/provider.dart';
 
 class GameActions extends StatelessWidget {
-  const GameActions({Key key}) : super(key: key);
+  const GameActions({Key? key}) : super(key: key);
 
   // final VoidCallback clear;
   // final VoidCallback refresh;
   // final VoidCallback submit;
 
-  static const double SIZE = 36;
+  static const double kIconSize = 36;
 
   @override
   Widget build(BuildContext context) {
     //bool isDark = MediaQuery.of(context).platformBrightness == Brightness.light; //TODO change
 
-    Widget _icon(IconData i, String t, Event e) {
+    Widget buildActionIcon(IconData iconData, String label, Event event) {
       return Column(
         children: <Widget>[
           TextButton(
             // iconSize: SIZE,
             child: Column(
               children: <Widget>[
-                Icon(i, size: SIZE, color: Theme.of(context).iconTheme.color),
-                Text(t, style: TextStyle(color: Theme.of(context).textTheme.bodyText1.color))
+                Icon(iconData, size: kIconSize, color: Theme.of(context).iconTheme.color),
+                Text(label, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))
               ],
             ),
             // color: Colors.transparent,
             // splashColor: Colors.grey,
-            onPressed: () => Provider.of(context).game.eventSink.add(e),
+            onPressed: () => Provider.of<GameBloc>(context, listen: false).eventSink.add(event),
           ),
         ],
       );
@@ -39,9 +39,9 @@ class GameActions extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          _icon(Icons.clear, "Clear", Event.CLEAR),
-          _icon(Icons.refresh, "Shuffle", Event.SHUFFLE),
-          _icon(Icons.check, "Check", Event.CHECK),
+          buildActionIcon(Icons.clear, "Clear", Event.clear),
+          buildActionIcon(Icons.refresh, "Shuffle", Event.shuffle),
+          buildActionIcon(Icons.check, "Check", Event.check),
         ],
       ),
     );

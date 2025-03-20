@@ -2,37 +2,64 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:spelling_bee/services/storage_service.dart';
 
+/// Helper class for loading assets and handling persistence
 class Assets {
+  /// Loads a string asset from the bundle
   static Future<String> loadAsset(String path) async {
     return await rootBundle.loadString(path);
   }
 
-  static Future<Map> loadMap(String path) async {
+  /// Loads a JSON map from an asset file
+  static Future<Map<String, dynamic>> loadMap(String path) async {
     String jsonString = await loadAsset(path);
-    return json.decode(jsonString);
+    return json.decode(jsonString) as Map<String, dynamic>;
   }
 
-  static Future<bool> setGame(List<String> list) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setStringList("game", list);
+  /// Saves the current game state
+  static Future<void> setGame(List<String> list) async {
+    final Map<String, dynamic> gameData = {
+      'game': list,
+    };
+    await StorageService.saveGame(gameData);
   }
 
+  /// Gets the saved game state
   static Future<List<String>> getGame() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList("game") ?? [];
+    final gameData = await StorageService.loadGame();
+    if (gameData == null || !gameData.containsKey('game')) {
+      return [];
+    }
+    
+    final gameList = gameData['game'];
+    if (gameList is List) {
+      return gameList.cast<String>();
+    }
+    
+    return [];
   }
 
-  static Future<bool> removeGame() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.remove("game");
+  /// Removes the saved game
+  static Future<void> removeGame() async {
+    await StorageService.removeGame();
   }
 
-  static Future<Map> getWordMap(bool useEnableDict) async {
-    var json = useEnableDict ? 'assets/words_large.json' : 'assets/words.json';
-    var wordMap = await loadMap(json);
-    return wordMap; 
+  /// Loads the word map for the current dictionary
+  static Future<Map<String, dynamic>> getWordMap(bool useEnableDict) async {
+    // Try to load from storage first
+    final cachedWordMap = await StorageService.loadWordMap(useEnableDict);
+    if (cachedWordMap != null) {
+      return cachedWordMap;
+    }
+    
+    // If not in storage, load from assets
+    final assetPath = useEnableDict ? 'assets/words_large.json' : 'assets/words.json';
+    final wordMap = await loadMap(assetPath);
+    
+    // Cache for future use
+    await StorageService.saveWordMap(useEnableDict, wordMap);
+    
+    return wordMap;
   }
-
 }

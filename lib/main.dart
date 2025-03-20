@@ -5,38 +5,47 @@ import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/consts.dart';
 import 'package:spelling_bee/helpers/ui.dart';
 import 'package:spelling_bee/pages/game.dart';
-import 'package:spelling_bee/helpers/provider.dart';
+import 'package:provider/provider.dart';
 import 'package:spelling_bee/pages/main_menu.dart';
 import 'package:spelling_bee/pages/rules.dart';
 import 'package:spelling_bee/pages/settings.dart';
-import 'package:native_state/native_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:flutter/rendering.dart';
 
-Future main() async {
+/// App entry point
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  var gameBloc = GameBloc();
+  // Initialize GameBloc
+  final gameBloc = GameBloc();
   await gameBloc.init();
 
-  // debugPaintSizeEnabled = true;
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
-    runApp(SavedState(child: MyApp(gameBloc: gameBloc)));
-  });
+  // Set preferred orientation to portrait
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  
+  // Load last route if saved
+  final prefs = await SharedPreferences.getInstance();
+  final lastRoute = prefs.getString('last_route') ?? '/';
+  
+  // Run the app
+  runApp(MyApp(gameBloc: gameBloc, initialRoute: lastRoute));
 }
 
+/// Game screen that shows the actual game
 class GameScreen extends StatelessWidget {
-  const GameScreen({
-    Key key,
-  }) : super(key: key);
+  const GameScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
-      return StreamBuilder<Object>(
-          stream: Provider.of(context).game.game,
+      final gameBloc = Provider.of<GameBloc>(context);
+      return StreamBuilder<String>(
+          stream: gameBloc.game,
           builder: (context, snapshot) {
-            return snapshot.hasData ? scaffold(Game(), context) : WAIT_WIDGET;
+            return snapshot.hasData 
+                ? scaffold(const Game(), context) 
+                : const Center(child: CircularProgressIndicator());
           });
     });
   }
@@ -46,62 +55,107 @@ class GameScreen extends StatelessWidget {
 //   return PageTransition(type: PageTransitionType.rightToLeftWithFade, child: w);
 // }
 
+/// Main app widget that sets up theming and routes
 class MyApp extends StatelessWidget {
   final GameBloc gameBloc;
-  // final Map wordMap;
-  // final Map statsMap;
-  MyApp({Key key, this.gameBloc}) : super(key: key);
-  // This widget is the root of your application.
+  final String initialRoute;
+  
+  const MyApp({
+    Key? key, 
+    required this.gameBloc,
+    required this.initialRoute,
+  }) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
-    var lightTheme = ThemeData(
+    final lightTheme = ThemeData(
       primarySwatch: Colors.yellow,
       brightness: Brightness.light,
       indicatorColor: Colors.black,
+      useMaterial3: true,
     );
 
-    var darkTheme = ThemeData(
+    final darkTheme = ThemeData(
         // primaryColor: Colors.black,
         // buttonColor: Colors.blueGrey,
-        textTheme: TextTheme(bodyText1: TextStyle(color: Colors.grey), bodyText2: TextStyle(color: Colors.grey)),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.grey), 
+          bodyMedium: TextStyle(color: Colors.grey),
+        ),
         // colorScheme: ColorScheme(secondary: Colors.black),
-        iconTheme: IconThemeData(color: Colors.blueGrey),
-        buttonTheme: ButtonThemeData(buttonColor: Colors.blueGrey, textTheme: ButtonTextTheme.accent),
+        iconTheme: const IconThemeData(color: Colors.blueGrey),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueGrey,
+          ),
+        ),
         primarySwatch: Colors.blueGrey,
         indicatorColor: Colors.blueGrey,
         // backgroundColor: Colors.black ,
-        toggleableActiveColor: Colors.blueGrey,
         canvasColor: Colors.black,
         scaffoldBackgroundColor: Colors.black,
-        cardTheme: CardTheme(color: Colors.black, shadowColor: Colors.blueGrey, elevation: 9),
-        brightness: Brightness.dark);
+        cardTheme: const CardTheme(color: Colors.black, shadowColor: Colors.blueGrey, elevation: 9),
+        brightness: Brightness.dark,
+        useMaterial3: true);
 
-    var navigatorKey = GlobalKey<NavigatorState>();
-    var savedState = SavedState.of(context);
-    var routeObserver = SavedStateRouteObserver(savedState: savedState);
+    final navigatorKey = GlobalKey<NavigatorState>();
 
-    return Provider(
-      game: this.gameBloc,
-      child: StreamBuilder(
-          stream: this.gameBloc.settings.theme,
+    return Provider<GameBloc>.value(
+      value: gameBloc,
+      child: StreamBuilder<int>(
+          stream: gameBloc.settings.theme,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return WAIT_WIDGET;
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            
             return MaterialApp(
-              title: GAME_TITLE,
+              title: gameTitle,
               theme: lightTheme,
               darkTheme: darkTheme,
-              themeMode: ThemeMode.values[snapshot.data],
+              themeMode: ThemeMode.values[snapshot.data!],
               navigatorKey: navigatorKey,
-              navigatorObservers: [routeObserver],
-              initialRoute: SavedStateRouteObserver.restoreRoute(savedState) ?? "/",
+              initialRoute: initialRoute,
               routes: {
-                '/': (context) => MainMenu(),
-                '/game': (context) => GameScreen(),
-                '/settings': (context) => Settings(),
-                '/rules': (context) => Rules(),
+                '/': (context) => const MainMenu(),
+                '/game': (context) => const GameScreen(),
+                '/settings': (context) => const Settings(),
+                '/rules': (context) => const Rules(),
               },
+              // Save route when navigating
+              navigatorObservers: [
+                _RouteObserver(
+                  onRouteChanged: (String route) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('last_route', route);
+                  },
+                ),
+              ],
             );
           }),
     );
+  }
+}
+
+/// Custom route observer to track navigation for state persistence
+class _RouteObserver extends NavigatorObserver {
+  final void Function(String) onRouteChanged;
+  
+  _RouteObserver({required this.onRouteChanged});
+  
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route.settings.name != null) {
+      onRouteChanged(route.settings.name!);
+    }
+    super.didPush(route, previousRoute);
+  }
+  
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (newRoute?.settings.name != null) {
+      onRouteChanged(newRoute!.settings.name!);
+    }
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 }

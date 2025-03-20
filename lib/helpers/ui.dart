@@ -4,31 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/consts.dart';
-import 'package:spelling_bee/helpers/provider.dart';
+import 'package:provider/provider.dart';
 import 'package:spelling_bee/pages/found_words.dart';
 import 'package:spelling_bee/widgets/word_list.dart';
 
 AlertDialog buildMissedWordsDialog(BuildContext context) {
-  var game = Provider.of(context).game;
-  var words = game.wordsRemaining;
+  final gameBloc = Provider.of<GameBloc>(context, listen: false);
+  final words = gameBloc.wordsRemaining;
 
   bool isDark = Theme.of(context).brightness == Brightness.dark;
 
   return AlertDialog(
-      title: Text("Missed Words"),
+      title: const Text("Missed Words"),
       content: WordList(words: SplayTreeSet<String>.from(words)),
       actions: <Widget>[
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: isDark ? Colors.grey : Colors.yellow),
-              child: Text(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? Colors.grey : Colors.yellow,
+              ),
+              child: const Text(
                 'Proceed to new game',
                 style: TextStyle(color: Colors.black),
               ),
               onPressed: () {
-                game.eventSink.add(Event.LOAD);
+                gameBloc.eventSink.add(Event.load);
                 Navigator.pop(context);
               },
             ),
@@ -42,17 +44,17 @@ Widget scaffold(Widget w, BuildContext context) {
       length: 2,
       child: Scaffold(
           appBar: AppBar(
-              title: Text(GAME_TITLE, style: TextStyle(fontSize: 18)),
+              title: const Text(gameTitle, style: TextStyle(fontSize: 18)),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                   tooltip: "New Game",
                   onPressed: () {
                     showDialog(context: context, builder: (context) => buildMissedWordsDialog(context));
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.settings),
+                  icon: const Icon(Icons.settings),
                   tooltip: "Settings",
                   onPressed: () {
                     Navigator.pushNamed(context, '/settings');
@@ -60,23 +62,101 @@ Widget scaffold(Widget w, BuildContext context) {
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.help),
-                  tooltip: "Help",
+                  icon: const Icon(Icons.help),
+                  tooltip: "Rules",
                   onPressed: () {
                     Navigator.pushNamed(context, '/rules');
-                    // Navigator.push(context, buildPageTransition(Rules()));
+                    //Navigator.push(context, buildPageTransition(Rules()));
                   },
                 ),
               ],
               bottom: TabBar(
-                tabs: [
-                  Tab(text: "Game", icon: Icon(Icons.edit)),
-                  Tab(text: "Word List", icon: Icon(Icons.view_list)),
-                ],
-              )),
-          body: TabBarView(
-            children: [w, FoundWords()],
-          )));
+                  indicatorColor: Theme.of(context).indicatorColor,
+                  tabs: [const Tab(text: "GAME"), Tab(text: "FOUND (${Provider.of<GameBloc>(context).wordsRemaining.length})")])
+              ),
+          body: TabBarView(children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: w,
+                ),
+              ],
+            ),
+            const FoundWords()
+          ])));
+}
+
+class TextFieldDialog extends StatefulWidget {
+  final String title;
+  final String label;
+  final String confirmText;
+  final Function(String) onConfirm;
+  final Function? onCancel;
+  final String text;
+  final bool obscureText;
+
+  const TextFieldDialog(
+      {Key? key,
+      required this.title,
+      required this.label,
+      required this.confirmText,
+      required this.onConfirm,
+      this.onCancel,
+      this.text = "",
+      this.obscureText = false})
+      : super(key: key);
+
+  @override
+  State<TextFieldDialog> createState() => _TextFieldDialogState();
+}
+
+class _TextFieldDialogState extends State<TextFieldDialog> {
+  late TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController(text: widget.text);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        controller: controller,
+        obscureText: widget.obscureText,
+        decoration: InputDecoration(
+          labelText: widget.label,
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            if (widget.onCancel != null) {
+              widget.onCancel!();
+            }
+          },
+        ),
+        TextButton(
+          child: Text(widget.confirmText),
+          onPressed: () {
+            Navigator.of(context).pop();
+            widget.onConfirm(controller.text);
+          },
+        ),
+      ],
+    );
+  }
 }
 
 PageTransition buildPageTransition(Widget w) {
@@ -85,9 +165,10 @@ PageTransition buildPageTransition(Widget w) {
 
 Card clickableCard(String title, String subtitle, Widget control, Function() onTap) {
   var inkWell = InkWell(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
+    onTap: onTap,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
           Row(
             children: <Widget>[
               Expanded(
@@ -95,7 +176,7 @@ Card clickableCard(String title, String subtitle, Widget control, Function() onT
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               )),
               control,
@@ -103,11 +184,10 @@ Card clickableCard(String title, String subtitle, Widget control, Function() onT
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(subtitle, style: TextStyle(color: Colors.grey)),
+            child: Text(subtitle, style: const TextStyle(color: Colors.grey)),
           ),
         ],
-      ),
-      onTap: onTap);
+      ));
   return Card(child: inkWell);
 }
 
@@ -137,12 +217,12 @@ void dialog(BuildContext context, String title, String content, VoidCallback yes
       content: Text(content),
       actions: <Widget>[
         TextButton(
-          child: Text('No'),
           onPressed: no,
+          child: const Text('No'),
         ),
         TextButton(
-          child: Text('Yes'),
           onPressed: yes,
+          child: const Text('Yes'),
         ),
       ],
     ),

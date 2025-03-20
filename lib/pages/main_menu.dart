@@ -1,168 +1,146 @@
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 import 'dart:core';
 
+import 'package:spelling_bee/blocs/game_bloc.dart';
 import 'package:spelling_bee/helpers/consts.dart';
-import 'package:spelling_bee/helpers/provider.dart';
-import 'package:spelling_bee/helpers/ui.dart';
-import 'package:spelling_bee/widgets/letter_collection.dart';
+import 'package:provider/provider.dart';
 import 'package:spelling_bee/widgets/points_row.dart';
 
 class MainMenu extends StatelessWidget {
-  const MainMenu({Key key}) : super(key: key);
+  const MainMenu({Key? key}) : super(key: key);
 
-  Widget _buildGamePreview(context) {
-    var gameState = Provider.of(context).game.state;
-    return StreamBuilder(
-        stream: gameState.game.stream,
+  Widget _buildGamePreview(BuildContext context) {
+    final gameBloc = Provider.of<GameBloc>(context);
+    return StreamBuilder<String>(
+        stream: gameBloc.game,
         builder: (context, snapshot) {
-          return snapshot.hasData ? GamePreview() : WAIT_WIDGET;
+          return snapshot.hasData 
+              ? const GamePreview() 
+              : const Center(child: CircularProgressIndicator());
         });
   }
 
-  Widget _buildRandomGameButton(context) {
-    var game = Provider.of(context).game;
-    return pad(raisedButton(context, "Reset and load new board", () {
-      game.loadGameSink.add(false);
-    }));
-  }
-
-  Widget _largeDictionaryInfoDialog(context) {
-    return AlertDialog(
-        title: text("Use large dictionary"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("Note that English vocabulary lists of a reasonable size are necessarily subjective.\n"),
-            Text("Selecting the large dictionary will result in more words being accepted, " +
-                "but will also require you to find more words that you might consider obscure.\n"),
-            Text("Using the smaller dictionary will require fewer words to be found, " +
-                "but result in some common words not being accepted.\n"),
-            Text("The larger dictionary is the Enable2k wordlist used in popular games like Words With Friends." +
-                "The smaller dictionary is the one named 2of12inf in the 12dicts collection by Alan Beale.\n"),
-            Text(
-                "Note that changing dictionaries can reset the game as not all games are valid games in both dictionaries.\n"),
-          ],
-        ));
+  Widget _buildRandomGameButton(BuildContext context) {
+    final gameBloc = Provider.of<GameBloc>(context);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: () {
+          gameBloc.loadGameSink.add(false);
+        },
+        child: const Text("Reset and load new board"),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    var game = Provider.of(context).game;
-
+    final gameBloc = Provider.of<GameBloc>(context);
     return Scaffold(
-        appBar: AppBar(title: Text(GAME_TITLE), actions: [
+      appBar: AppBar(
+        title: const Text(gameTitle),
+        actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.settings),
-            tooltip: "Settings",
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
             onPressed: () {
               Navigator.pushNamed(context, '/settings');
-              //Navigator.push(context, buildPageTransition(Settings()));
             },
           ),
           IconButton(
-            icon: Icon(Icons.help),
-            tooltip: "Help",
+            icon: const Icon(Icons.help),
+            tooltip: 'Rules',
             onPressed: () {
               Navigator.pushNamed(context, '/rules');
-              // Navigator.push(context, buildPageTransition(Rules()));
             },
           ),
-        ]),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            _buildGamePreview(context),
-
-            clickableCard(
-                "Use large dictionary?",
-                "Changing dictionaries might reset the game. \nTap to view more info about this setting.",
-                switchControl(game.useEnableDict), () {
-              showDialog(context: context, builder: _largeDictionaryInfoDialog);
-            }),
-
-            _buildRandomGameButton(context),
-            // _buildCustomGameButton(context), TODO ??
-            // TODO: settings, rules, tips, support?
-            // TODO: dark mode could be better
-          ],
-        ));
-  }
-}
-
-StreamBuilder<bool> switchControl(BehaviorSubject<bool> sub) {
-  return StreamBuilder(
-    stream: sub.stream,
-    builder: (BuildContext context, AsyncSnapshot snapshot) {
-      return snapshot.hasData
-          ? Switch(
-              value: snapshot.data,
-              onChanged: (bool b) {
-                sub.sink.add(b);
-              })
-          : WAIT_WIDGET;
-    },
-  );
-}
-
-class GamePreview extends StatelessWidget {
-  const GamePreview({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var gameState = Provider.of(context).game.state;
-
-    return Column(
-      children: [
-        InkWell(
-            child: AbsorbPointer(
-                absorbing: true,
-                child: Card(
-                  child: Column(
-                    children: [
-                      StreamBuilder(
-                          stream: gameState.points.stream,
-                          initialData: 0,
-                          builder: (context, snapshot) {
-                            var verb = snapshot.data > 0 ? "resume" : "start";
-                            return pad(text("Tap here to " + verb + " playing this game"));
-                          }),
-                      buildPointsRow(context),
-                      LetterCollection(),
-                    ],
+        ],
+      ),
+      body: ListView(
+        children: <Widget>[
+          const SizedBox(height: 20),
+          _buildGamePreview(context),
+          StreamBuilder<bool>(
+            stream: gameBloc.isGameSaved,
+            builder: (context, snapshot) {
+              final hasSavedGame = snapshot.data ?? false;
+              return Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      if (hasSavedGame) {
+                        gameBloc.loadGameSink.add(true);
+                      }
+                      Navigator.pushNamed(context, '/game');
+                    },
+                    child: Text(hasSavedGame ? "Resume game" : "Start new game"),
                   ),
-                )),
-            onTap: () {
-              Navigator.pushNamed(context, '/game');
-            }),
-      ],
+                  if (hasSavedGame) _buildRandomGameButton(context),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
 
-Padding pad(Widget w) {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: w,
-  );
+class GamePreview extends StatelessWidget {
+  const GamePreview({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(10.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            const Text(
+              "Current Game",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            buildPointsRow(context),
+            const SizedBox(height: 10),
+            buildProgressRow(context),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-Text text(String text) {
-  return Text(
-    text,
-    style: TextStyle(fontSize: 22),
+Widget buildProgressRow(BuildContext context) {
+  final gameBloc = Provider.of<GameBloc>(context);
+  return StreamBuilder<int>(
+    stream: gameBloc.wordCount,
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) return Container();
+      final wordsFound = snapshot.data ?? 0;
+      final totalWords = gameBloc.maxWords;
+      final percentComplete = wordsFound / totalWords * 100;
+      
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Words found: $wordsFound / $totalWords"),
+              Text("${percentComplete.toStringAsFixed(1)}%"),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: wordsFound / totalWords,
+            backgroundColor: Colors.grey[300],
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).primaryColor,
+            ),
+          ),
+        ],
+      );
+    },
   );
-}
-
-ElevatedButton raisedButton(BuildContext context, String title, Function onPressed) {
-  // bool isDark = Theme.of(context).brightness == Brightness.dark;
-
-  return ElevatedButton(
-      child: text(title),
-      onPressed: onPressed,
-      style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-      ));
 }

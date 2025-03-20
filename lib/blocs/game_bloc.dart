@@ -1,68 +1,71 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spelling_bee/blocs/settings_bloc.dart';
 import 'package:spelling_bee/helpers/assets.dart';
 import 'package:spelling_bee/helpers/logic.dart';
+import 'package:spelling_bee/services/storage_service.dart';
 
-enum Event { LOAD, DELETE, CHECK, SHUFFLE, CLEAR }
+enum Event { load, delete, check, shuffle, clear }
 
+/// Represents a message to display to the user
 class Message {
   final String message;
   final bool error;
   Message(this.message, [this.error = false]);
 }
 
-class _GameStore {
+/// Types of messages that can be displayed to the user
+enum MessageType { pangram, found, invalid, notCenter, short, duplicate }
+
+class GameStore {
   final List<String> _val;
 
-  _GameStore() : this._val = [];
+  GameStore() : _val = [];
 
-  _GameStore.fromCache(List<String> val) : this._val = val;
+  GameStore.fromCache(List<String> val) : _val = val;
 
-  String game() => (_val.length > 0) ? _val[0] : null;
+  String? game() => (_val.isNotEmpty) ? _val[0] : null;
 
   List<String> foundWords() => (_val.length > 1) ? _val.sublist(1) : [];
 
   List<String> val() => _val;
 }
 
-class _Game {
-  BehaviorSubject<String> game = BehaviorSubject<String>();
-  BehaviorSubject<String> word = BehaviorSubject<String>();
+class GameState {
+  final BehaviorSubject<String> game = BehaviorSubject<String>();
+  final BehaviorSubject<String> word = BehaviorSubject<String>();
 
-  BehaviorSubject<SplayTreeSet<String>> words = BehaviorSubject<SplayTreeSet<String>>();
+  final BehaviorSubject<SplayTreeSet<String>> words = BehaviorSubject<SplayTreeSet<String>>();
 
-  BehaviorSubject<SplayTreeSet<String>> wordsRemaining = BehaviorSubject<SplayTreeSet<String>>();
+  final BehaviorSubject<SplayTreeSet<String>> wordsRemaining = BehaviorSubject<SplayTreeSet<String>>();
 
-  BehaviorSubject<Message> message = BehaviorSubject<Message>.seeded(Message(""));
+  final BehaviorSubject<Message> message = BehaviorSubject<Message>.seeded(Message(""));
 
-  BehaviorSubject<int> points = BehaviorSubject<int>();
+  final BehaviorSubject<int> points = BehaviorSubject<int>();
 
   int maxWords = 0, maxPoints = 0;
 
-  // Sink<Message> messageSink;
-  //Logic.answer(wordMap, game)
-
   void reset(String game, List<String> answer, [List<String> wordList = const []]) {
-    var words = SplayTreeSet<String>.from(wordList);
-    var wordsRemaining = SplayTreeSet<String>.from(answer).difference(words);
+    final wordsSet = SplayTreeSet<String>.from(wordList);
+    final answerSet = SplayTreeSet<String>.from(answer);
+    final wordsRemaining = SplayTreeSet<String>.from(answerSet.difference(wordsSet));
+    
     this.game.add(game);
     this.wordsRemaining.add(wordsRemaining);
-    this.word.add("");
-    this.words.add(words);
-    // this.message.add(Message(""));
-    this.points.add(Logic.pointsForAns(wordList, game));
+    word.add("");
+    words.add(wordsSet);
+    points.add(Logic.pointsForAns(wordList, game));
     maxWords = answer.length;
     maxPoints = Logic.pointsForAns(answer, game);
   }
 
-  _setWord(String w) => {word.add(w)};
+  void _setWord(String w) => word.add(w);
 
   bool addLetter(String l) {
-    if (word.value.length > Logic.MAX_WORD_LENGTH) {
+    if ((word.value).length > Logic.kMaxWordLength) {
       return false;
     }
     _setWord(word.value + l);
@@ -70,18 +73,18 @@ class _Game {
   }
 
   void delete() {
-    if (word.value.length >= 1) _setWord(word.value.substring(0, word.value.length - 1));
+    if (word.value.isNotEmpty) _setWord(word.value.substring(0, word.value.length - 1));
   }
 
   void clear() => _setWord("");
 
-  void _setTempMessage(m) {
+  void _setTempMessage(Message m) {
     message.add(m);
     // ?TODO Should this logic belong in the bloc?
-    Timer(Duration(milliseconds: 500), () => message.add(Message("")));
+    Timer(const Duration(milliseconds: 500), () => message.add(Message("")));
   }
 
-  bool check(Map wordMap) {
+  bool check(Map<String, dynamic> wordMap) {
     String status = Logic.check(word.value, game.value, words.value, wordMap);
     bool res = Logic.isCorrectProvider(status);
     if (res) {
@@ -102,10 +105,10 @@ class _Game {
     game.add(Logic.shuffleGame(game.value));
   }
 
-  _GameStore getGameStore() {
+  GameStore getGameStore() {
     var l = words.value.toList();
     l.insert(0, game.value);
-    return _GameStore.fromCache(l);
+    return GameStore.fromCache(l);
   }
 
   void dispose() {
@@ -118,37 +121,41 @@ class _Game {
   }
 }
 
+/// Main game BLoC that manages game state and logic
 class GameBloc {
   GameBloc();
 
-  var settings = SettingsBloc();
-  var state = _Game();
-  var _loadEnableDict;
+  final SettingsBloc settings = SettingsBloc();
+  final GameState state = GameState();
 
-  BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
+  // Settings
+  final BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
+  bool? _loadEnableDict;
 
-  BehaviorSubject<Map> _wordMap = BehaviorSubject<Map>();
+  // State
+  final BehaviorSubject<String> _game = BehaviorSubject<String>();
+  Stream<String> get game => _game.stream;
 
-  // STREAMS
+  final BehaviorSubject<Map<String, dynamic>> _wordMap = BehaviorSubject<Map<String, dynamic>>();
+  Stream<Map<String, dynamic>> get wordMap => _wordMap.stream;
+
+  final BehaviorSubject<bool> _isGameSaved = BehaviorSubject<bool>();
+  Stream<bool> get isGameSaved => _isGameSaved.stream;
+
+  // Game state streams
   Stream<SplayTreeSet<String>> get foundWords => state.words.stream;
-
   Stream<String> get word => state.word.stream;
-  Stream<String> get game => state.game.stream;
   Stream<Message> get message => state.message.stream;
-  // Stream<List<String>> get answer => _gameState.answer.stream;
-
   Stream<int> get points => state.points.stream;
   Stream<int> get wordCount => state.words.map((x) => x.length);
 
-  SplayTreeSet<String> get wordsRemaining => state.wordsRemaining.stream.value;
+  // Game state getters
+  SplayTreeSet<String> get wordsRemaining => state.wordsRemaining.value;
   int get maxPoints => state.maxPoints;
   int get maxWords => state.maxWords;
 
-  final _isGameSaved = BehaviorSubject<bool>.seeded(false);
-  Stream<bool> get isGameSaved => _isGameSaved.stream;
-
-  // SINKS
-  final _event = PublishSubject<Event>();
+  // Event handlers
+  final PublishSubject<Event> _event = PublishSubject<Event>();
   Sink<Event> get eventSink => _event.sink;
 
   final _loadGame = PublishSubject<bool>();
@@ -157,57 +164,67 @@ class GameBloc {
   final _nextLetter = PublishSubject<String>();
   Sink<String> get nextLetterSink => _nextLetter.sink;
 
-  _GameStore _savedGame;
+  GameStore? _savedGame;
 
   Future<void> init() async {
     await settings.init(); // Do this first
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    useEnableDict.add(prefs.getBool("useEnable") ?? true);
+    // Get dictionary preference
+    final useEnable = await StorageService.getUseEnableDict();
+    useEnableDict.add(useEnable);
 
     await loadWordMap();
 
-    _savedGame = _GameStore.fromCache(await Assets.getGame());
-    var isGameSaved = _savedGame.val().length > 0;
+    // Load saved game if it exists
+    final savedGameData = await Assets.getGame();
+    _savedGame = GameStore.fromCache(savedGameData);
+    final isGameSaved = _savedGame != null && _savedGame!.val().isNotEmpty;
     _isGameSaved.add(isGameSaved);
-    // _loadGameHandler(isGameSaved);
 
-    useEnableDict.listen((bool use) {
-      prefs.setBool("useEnable", use);
+    // Listen for dictionary preference changes
+    useEnableDict.listen((bool use) async {
+      await StorageService.setUseEnableDict(use);
       _loadGameHandler(true);
     });
+    
     _loadGame.listen(_loadGameHandler);
     _nextLetter.listen(state.addLetter);
     _event.listen(_eventHandler);
   }
 
   Future<void> loadWordMap() async {
-    if (_loadEnableDict == useEnableDict.stream.value) return;
-    _loadEnableDict = useEnableDict.stream.value;
-    var wordMap = await Assets.getWordMap(_loadEnableDict);
-    this._wordMap.add(wordMap);
+    if (_loadEnableDict == useEnableDict.value) return;
+    _loadEnableDict = useEnableDict.value;
+    final wordMap = await Assets.getWordMap(_loadEnableDict ?? true);
+    _wordMap.add(wordMap);
   }
 
   void _saveGame(bool save) {
     _savedGame = save ? state.getGameStore() : null;
-    save ? Assets.setGame(_savedGame.val()) : Assets.removeGame();
+    if (save && _savedGame != null) {
+      Assets.setGame(_savedGame!.val());
+    } else {
+      Assets.removeGame();
+    }
     _isGameSaved.add(save);
   }
 
   Future<void> _loadGameHandler(bool resume) async {
     await loadWordMap();
-    var wordMap = this._wordMap.stream.value;
+    final wordMap = _wordMap.value;
 
-    String game = _savedGame != null ? _savedGame.game() : Logic.randomGame(wordMap);
-
-    game = (resume && (game != null) && Logic.isGameValid(wordMap, game)) ? game : Logic.randomGame(wordMap);
-    var answer = Logic.answer(wordMap, game);
+    String? gameStr = _savedGame != null ? _savedGame!.game() : Logic.randomGame(wordMap);
+    String game = (resume && (gameStr != null) && Logic.isGameValid(wordMap, gameStr)) 
+        ? gameStr 
+        : Logic.randomGame(wordMap);
+    
+    final answer = Logic.answer(wordMap, game);
 
     List<String> foundWords = <String>[];
-    if (resume) {
-      foundWords =
-          SplayTreeSet<String>.from(_savedGame.foundWords()).intersection(SplayTreeSet<String>.from(answer)).toList();
+    if (resume && _savedGame != null) {
+      foundWords = SplayTreeSet<String>.from(_savedGame!.foundWords())
+          .intersection(SplayTreeSet<String>.from(answer))
+          .toList();
     }
 
     state.reset(game, answer, foundWords);
@@ -215,38 +232,26 @@ class GameBloc {
   }
 
   void _eventHandler(Event e) {
-    var wordMap = this._wordMap.stream.value;
+    final wordMap = _wordMap.value;
     switch (e) {
-      case Event.LOAD:
-        {
-          _loadGameHandler(false);
-        }
+      case Event.load:
+        _loadGameHandler(false);
         break;
-      case Event.CHECK:
-        {
-          if (state.check(wordMap)) _saveGame(true);
-        }
+      case Event.check:
+        if (state.check(wordMap)) _saveGame(true);
         break;
-
-      case Event.SHUFFLE:
-        {
-          state.shuffle();
-        }
+      case Event.shuffle:
+        state.shuffle();
         break;
-
-      case Event.DELETE:
-        {
-          state.delete();
-        }
+      case Event.delete:
+        state.delete();
         break;
-      case Event.CLEAR:
-        {
-          state.clear();
-        }
+      case Event.clear:
+        state.clear();
         break;
       default:
-        {
-          // print("Unhandled event");
+        if (kDebugMode) {
+          //print("Unhandled event");
         }
         break;
     }
@@ -254,10 +259,12 @@ class GameBloc {
 
   void dispose() {
     state.dispose();
+    useEnableDict.close();
+    _wordMap.close();
     _isGameSaved.close();
+    _event.close();
     _loadGame.close();
     _nextLetter.close();
-    _event.close();
-    _wordMap.close();
+    settings.dispose();
   }
 }

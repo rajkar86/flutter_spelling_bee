@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-
-import 'package:spelling_bee/helpers/provider.dart';
-import 'package:spelling_bee/helpers/ui.dart';
+import 'package:provider/provider.dart';
+import 'package:spelling_bee/blocs/game_bloc.dart';
 
 String themeString(ThemeMode t) {
   var s = t.toString().split(".").last;
@@ -10,88 +9,96 @@ String themeString(ThemeMode t) {
 }
 
 class Settings extends StatelessWidget {
-  const Settings({Key key}) : super(key: key);
-
-  Widget _settings(context) {
-    var game = Provider.of(context).game;
-    var settings = game.settings;
-
-    return Column(
-      children: [
-        clickableCard(
-            "Theme",
-            themeString(ThemeMode.values[settings.theme.stream.value]),
-            Container(), () {
-          showDialog(
-              context: context,
-              builder: (context) => _optionsDialog(context, settings.theme));
-        }),
-        // _setting(
-        //     "Use large dictionary",
-        //     "If enabled, the dictionary used in popular games like Words With Friends will be used. " +
-        //         "Using this dictionary, which is larger than the default option, will result in the game accepting more words as valid, " +
-        //         "but will also require you to find a lot more words." +
-        //         "Note that changes take place when you start a new game or on full restart of the app.",
-        //     switchControl(game.useEnableDict), () {
-        //   game.useEnableDict.sink.add(!game.useEnableDict.stream.value);
-        // })
-      ],
-    );
-  }
-
-  // StreamBuilder<bool> switchControl(BehaviorSubject<bool> sub) {
-  //   return StreamBuilder(
-  //     stream: sub.stream,
-  //     builder: (BuildContext context, AsyncSnapshot snapshot) {
-  //       return snapshot.hasData
-  //           ? Switch(
-  //               value: snapshot.data,
-  //               onChanged: (bool b) {
-  //                 sub.sink.add(b);
-  //               })
-  //           : WAIT_WIDGET;
-  //     },
-  //   );
-  // }
-
-  // TODO make this generic,
-  // Maybe a collection Widgets that respond to to BehaviorSubject-s
-  Widget _optionsDialog(BuildContext context, BehaviorSubject<int> choice) {
-    return SimpleDialog(title: Text("Theme"), children: [
-      StreamBuilder(
-          stream: choice.stream,
-          builder: (context, snapshot) {
-            return snapshot.hasData
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: ThemeMode.values
-                        .map((v) => RadioListTile(
-                            title: Text(themeString(v)),
-                            groupValue: choice.stream.value,
-                            value: v.index,
-                            onChanged: (val) {
-                              choice.sink.add(v.index);
-                              Navigator.pop(context);
-                            }))
-                        .toList(),
-                  )
-                : Center(
-                    child: CircularProgressIndicator(),
-                  );
-          })
-    ]);
-  }
+  const Settings({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return _build(<Widget>[_settings(context)]);
+    return Scaffold(
+      appBar: AppBar(title: const Text("Settings")),
+      body: ListView(
+        children: <Widget>[
+          _buildThemeSettings(context),
+        ],
+      ),
+    );
   }
 
-  Widget _build(List<Widget> w) {
-    return Scaffold(
-        appBar: AppBar(title: Text("Settings")),
-        body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [Expanded(child: ListView(children: w))]));
+  Widget _buildThemeSettings(BuildContext context) {
+    final gameBloc = Provider.of<GameBloc>(context);
+    final settings = gameBloc.settings;
+
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Theme Settings",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            StreamBuilder<int>(
+              stream: settings.theme,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                return Column(
+                  children: [
+                    ListTile(
+                      title: const Text("Current theme"),
+                      subtitle: Text(themeString(ThemeMode.values[snapshot.data!])),
+                      trailing: const Icon(Icons.palette),
+                      onTap: () {
+                        _showThemeDialog(context, settings.theme);
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showThemeDialog(BuildContext context, BehaviorSubject<int> themeSubject) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Select Theme"),
+        content: SingleChildScrollView(
+          child: StreamBuilder<int>(
+            stream: themeSubject,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: ThemeMode.values.map((themeMode) {
+                  return RadioListTile<int>(
+                    title: Text(themeString(themeMode)),
+                    value: themeMode.index,
+                    groupValue: snapshot.data,
+                    onChanged: (value) {
+                      if (value != null) {
+                        themeSubject.add(value);
+                        Navigator.pop(context);
+                      }
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }

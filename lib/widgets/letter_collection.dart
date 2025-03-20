@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:spelling_bee/helpers/provider.dart';
-import 'package:polygon_clipper/polygon_border.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_polygon/flutter_polygon.dart';
+import 'package:spelling_bee/blocs/game_bloc.dart';
 
 class LetterCollection extends StatelessWidget {
-  // LetterCollection({Key key}) : super(key: key);
-
-  // final ValueChanged<String> onPressed;
-  // final String letters;
+  const LetterCollection({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: Provider.of(context).game.game,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        return snapshot.hasData ? _build(context, snapshot.data) : Container();
+    return StreamBuilder<String>(
+      stream: Provider.of<GameBloc>(context).game,
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        return snapshot.hasData ? _build(context, snapshot.data ?? '') : Container();
       },
     );
   }
@@ -25,29 +23,28 @@ class LetterCollection extends StatelessWidget {
     var color1 = isDark ? Colors.grey : Colors.black;
     var color2 = isDark ? Colors.blueGrey : Colors.yellow;
 
-    Widget _button(String c, [bool center = false]) {
+    Widget button(String c, [bool center = false]) {
       var s = TextStyle(color: isDark ? Colors.black : (center ? color2 : color1), fontSize: 24);
 
       return Center(
         child: Padding(
           padding: EdgeInsets.only(left: sz * 0.4, right: sz * 0.4),
-          child: ButtonTheme(
+          child: SizedBox(
             height: sz,
-            minWidth: sz,
-            child: RaisedButton(
+            width: sz,
+            child: ElevatedButton(
               onPressed: () {
-                Provider.of(context).game.nextLetterSink.add(c);
+                Provider.of<GameBloc>(context, listen: false).nextLetterSink.add(c);
               },
-              color: (center ? color1 : color2),
-              shape: PolygonBorder(
-                sides: 6,
-                borderRadius: 0.0, // Default 0.0 degrees
-                rotate: 90.0, // Default 0.0 degrees
-                border: BorderSide.none, // Default BorderSide.none
+              style: ElevatedButton.styleFrom(
+                backgroundColor: (center ? color1 : color2),
+                shape: const PolygonBorder(
+                  sides: 6,
+                  borderRadius: 0.0,
+                  rotate: 90.0,
+                ),
+                padding: EdgeInsets.zero,
               ),
-              // BeveledRectangleBorder(
-              //   borderRadius: BorderRadius.circular(sz/2),
-              // ),
               child: Text(c, style: s),
             ),
           ),
@@ -55,28 +52,34 @@ class LetterCollection extends StatelessWidget {
       );
     }
 
-    Widget _buttonRow(String chars) {
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround, children: chars.split("").map((c) => _button(c)).toList());
-    }
+    var chars = letters.split('');
+    var center = chars[0];
+    chars = chars.sublist(1);
 
-    // print (MediaQuery.of(context).size.width);
-    // print (MediaQuery.of(context).size.height);
-    var dist = sz * 0.5;
-
-    return Container(
-      height: sz * 3,
-      child: Stack(
-          // mainAxisAlignment: MainAxisAlignment.center,
-          alignment: const Alignment(0, 0),
-          fit: StackFit.loose,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: button(center, true),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Positioned(top: 0 * dist, child: _button(letters[1])),
-            Positioned(top: 1 * dist, child: _buttonRow(letters[2] + letters[3])),
-            Positioned(top: 2 * dist, child: _button(letters[0], true)),
-            Positioned(top: 3 * dist, child: _buttonRow(letters[4] + letters[5])),
-            Positioned(top: 4 * dist, child: _button(letters[6]))
-          ]),
+            button(chars[0]),
+            button(chars[1]),
+            button(chars[2]),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            button(chars[3]),
+            button(chars[4]),
+            button(chars[5]),
+          ],
+        ),
+      ],
     );
   }
 }

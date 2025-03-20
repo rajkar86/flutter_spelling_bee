@@ -1,36 +1,28 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:spelling_bee/services/storage_service.dart';
 
+/// A BLoC to manage application settings
 class SettingsBloc {
-
-  // Don't use BehaviorSubjects directly in clients
-  // BehaviorSubject<bool> useEnableDict = BehaviorSubject<bool>();
-  BehaviorSubject<int> theme = BehaviorSubject<int>();
+  // BehaviorSubject to track theme changes
+  final BehaviorSubject<int> theme = BehaviorSubject<int>();
 
   SettingsBloc();
 
+  /// Initialize settings from storage
   Future<void> init() async {
+    // Load theme setting
+    final themeIndex = await StorageService.loadTheme();
+    theme.add(themeIndex);
     
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-    // useEnableDict.add(prefs.getBool("useEnable") ?? true);   
-    // useEnableDict.listen((bool use){
-    //   prefs.setBool("useEnable", use);
-    //   // _reloadWordMap = true;
-    // });     
-
-    theme.add(prefs.getInt("theme") ?? ThemeMode.system.index);
-    theme.listen((int theme){
-      prefs.setInt("theme", theme);
+    // Listen for theme changes and save them
+    theme.listen((int themeIndex) async {
+      await StorageService.saveTheme(themeIndex);
     });
-
   }
 
+  /// Dispose of resources
   void dispose() {
-    // useEnableDict.close();
     theme.close();
   }
 }

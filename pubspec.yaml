@@ -15,7 +15,7 @@ description: Not that Spelling Bee game
 version: 1.0.1+21
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -23,18 +23,30 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
-  page_transition: ^1.0.9
-  trotter: ^0.9.1
-  shared_preferences: ^0.5.2
-  rxdart : ^0.21.0
-  native_state: ^1.0.0-rc01
-  polygon_clipper: ^1.0.2
-
+  cupertino_icons: ^1.0.5
+  page_transition: ^2.0.9
+  trotter: ^2.0.0
+  shared_preferences: ^2.1.0
+  rxdart: ^0.27.7
+  # Using the official provider package instead of custom provider
+  provider: ^6.0.5
+  # Replacing polygon_clipper with a null-safe alternative
+  # Will need to rewrite the code that uses polygon_clipper
+  # Replacing native_state with null-safe alternative
+  shared_preferences_web: ^2.1.0
+  # Additional packages for state persistence
+  path_provider: ^2.0.15
+  flutter_polygon: ^0.3.0+2
+  
 dev_dependencies:
-  flutter_launcher_icons: ^0.7.2
+  flutter_launcher_icons: "^0.12.0"
   flutter_test:
     sdk: flutter
+  flutter_lints: ^2.0.3
+
+# Enable null safety for all packages
+# This is needed for packages that haven't migrated to null safety yet
+publish_to: none
 
 flutter_icons:
   android: true
@@ -42,9 +54,7 @@ flutter_icons:
   adaptive_icon_background: "#FFFFEB3B"
   adaptive_icon_foreground: "assets/icon_bee_padded.png"
 
-# flutter pub run flutter_launcher_icons:main -f pubspec.yaml 
-# flutter pub pub run flutter_launcher_icons:main -f pubspec.yaml 
-
+# flutter pub run flutter_launcher_icons:main
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
