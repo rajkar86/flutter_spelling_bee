@@ -184,6 +184,11 @@ class GameBloc {
       final isGameSaved = _savedGame != null && _savedGame!.val().isNotEmpty;
       _isGameSaved.add(isGameSaved);
 
+      // Initialize the game string to ensure the UI can render something
+      final wordMap = _wordMap.value;
+      String game = isGameSaved ? (_savedGame!.game() ?? Logic.randomGame(wordMap)) : Logic.randomGame(wordMap);
+      _game.add(game);
+
       // Listen for dictionary preference changes
       useEnableDict.listen((bool use) async {
         await StorageService.setUseEnableDict(use);
@@ -204,15 +209,27 @@ class GameBloc {
       }
       // Add a default empty game to prevent loading forever
       _isGameSaved.add(false);
-      state.reset('abcdefg', [''], []);
+      
+      // Ensure a valid game is added to the stream
+      final defaultGame = 'abcdefg';
+      _game.add(defaultGame);
+      state.reset(defaultGame, [''], []);
     }
   }
 
   Future<void> loadWordMap() async {
     if (_loadEnableDict == useEnableDict.value) return;
     _loadEnableDict = useEnableDict.value;
-    final wordMap = await Assets.getWordMap(_loadEnableDict ?? true);
-    _wordMap.add(wordMap);
+    try {
+      final wordMap = await Assets.getWordMap(_loadEnableDict ?? true);
+      _wordMap.add(wordMap);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading word map: $e');
+      }
+      // Add an empty map to prevent hanging
+      _wordMap.add({});
+    }
   }
 
   void _saveGame(bool save) {
@@ -226,25 +243,37 @@ class GameBloc {
   }
 
   Future<void> _loadGameHandler(bool resume) async {
-    await loadWordMap();
-    final wordMap = _wordMap.value;
+    try {
+      await loadWordMap();
+      final wordMap = _wordMap.value;
 
-    String? gameStr = _savedGame != null ? _savedGame!.game() : Logic.randomGame(wordMap);
-    String game = (resume && (gameStr != null) && Logic.isGameValid(wordMap, gameStr)) 
-        ? gameStr 
-        : Logic.randomGame(wordMap);
-    
-    final answer = Logic.answer(wordMap, game);
+      String? gameStr = _savedGame != null ? _savedGame!.game() : Logic.randomGame(wordMap);
+      String game = (resume && (gameStr != null) && Logic.isGameValid(wordMap, gameStr)) 
+          ? gameStr 
+          : Logic.randomGame(wordMap);
+      
+      _game.add(game); // Ensure game is added to the stream
 
-    List<String> foundWords = <String>[];
-    if (resume && _savedGame != null) {
-      foundWords = SplayTreeSet<String>.from(_savedGame!.foundWords())
-          .intersection(SplayTreeSet<String>.from(answer))
-          .toList();
+      final answer = Logic.answer(wordMap, game);
+
+      List<String> foundWords = <String>[];
+      if (resume && _savedGame != null) {
+        foundWords = SplayTreeSet<String>.from(_savedGame!.foundWords())
+            .intersection(SplayTreeSet<String>.from(answer))
+            .toList();
+      }
+
+      state.reset(game, answer, foundWords);
+      if (!resume) _saveGame(true);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading game: $e');
+      }
+      // Ensure a valid game is added to recover from errors
+      final defaultGame = 'abcdefg';
+      _game.add(defaultGame);
+      state.reset(defaultGame, [''], []);
     }
-
-    state.reset(game, answer, foundWords);
-    if (!resume) _saveGame(true);
   }
 
   void _eventHandler(Event e) {

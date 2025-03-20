@@ -8,15 +8,7 @@ import 'package:spelling_bee/blocs/game_bloc.dart';
 class CurrentWord extends StatelessWidget {
   const CurrentWord({
     Key? key,
-    // @required this.word,
-    // @required this.onBackspace,
-    // @required Animation<double> animation,
-    // }) : super(key: key, listenable: animation);
   }) : super(key: key);
-
-  // final String word;
-  // final VoidCallback onBackspace;
-
 
   @override
   Widget build(BuildContext context) {
@@ -30,34 +22,46 @@ class CurrentWord extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, String word) {
-    // var animation = listenable;
-    // double d = animation.value;
-
-    void onPressed() {
-      Provider.of<GameBloc>(context, listen: false).eventSink.add(Event.delete);
-    }
-
-    double sz = min(24, 36.0 - word.length);
-      
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        SizedBox(width: sz*2),
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 4.0, right: 4.0),
-            child: Text(
-              word,
-              style: TextStyle(fontSize: sz, letterSpacing: 0),
-              //42 - 10 * (d-0.5).abs()
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate font size based on available width and word length
+        final availableWidth = constraints.maxWidth;
+        final baseFontSize = availableWidth * 0.06;
+        final fontSize = min(24.0, max(14.0, baseFontSize - (word.length * 0.5)));
+        final iconSize = fontSize;
+        
+        void onPressed() {
+          Provider.of<GameBloc>(context, listen: false).eventSink.add(Event.delete);
+        }
+        
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            // Flexible spacer that takes up available space
+            const Spacer(flex: 1),
+            // Word display with flexible constraints
+            Expanded(
+              flex: 6,
+              child: Center(
+                child: Text(
+                  word,
+                  style: TextStyle(fontSize: fontSize, letterSpacing: 0),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
-          ),
-        ),
-        IconButton(
-          icon: Icon(Icons.backspace, size: sz), 
-          onPressed: onPressed
-        )
-      ],
+            // Backspace button
+            IconButton(
+              icon: Icon(Icons.backspace, size: iconSize), 
+              onPressed: onPressed,
+              padding: EdgeInsets.all(fontSize * 0.2),
+              constraints: const BoxConstraints(),
+            ),
+            const Spacer(flex: 1),
+          ],
+        );
+      }
     );
   }
 }

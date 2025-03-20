@@ -21,8 +21,9 @@ Future<void> main() async {
   final gameBloc = GameBloc();
   await gameBloc.init();
 
-  // Set preferred orientation to portrait
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // Allow both portrait and landscape orientations for better responsiveness
+  // (removing the orientation lock)
+  // await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   
   // Load last route if saved
   final prefs = await SharedPreferences.getInstance();
@@ -43,9 +44,87 @@ class GameScreen extends StatelessWidget {
       return StreamBuilder<String>(
           stream: gameBloc.game,
           builder: (context, snapshot) {
-            return snapshot.hasData 
-                ? scaffold(const Game(), context) 
-                : const Center(child: CircularProgressIndicator());
+            if (snapshot.hasData) {
+              return scaffold(const Game(), context);
+            } else if (snapshot.hasError) {
+              // Handle errors by showing an error message
+              return Scaffold(
+                appBar: AppBar(title: const Text('Error')),
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Failed to load game', style: TextStyle(fontSize: 18)),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Try to force reload a new game
+                          gameBloc.loadGameSink.add(false);
+                        },
+                        child: const Text('Try Again'),
+                      ),
+                      const SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                        },
+                        child: const Text('Back to Menu'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              // Add a timeout to prevent indefinite loading
+              return FutureBuilder(
+                future: Future.delayed(const Duration(seconds: 5)),
+                builder: (context, timeoutSnapshot) {
+                  if (timeoutSnapshot.connectionState == ConnectionState.done) {
+                    // If we've waited too long, provide a way to recover
+                    return Scaffold(
+                      appBar: AppBar(title: const Text('Loading...')),
+                      body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Game is taking too long to load', style: TextStyle(fontSize: 18)),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Try to force reload a new game
+                                gameBloc.loadGameSink.add(false);
+                              },
+                              child: const Text('Load New Game'),
+                            ),
+                            const SizedBox(height: 10),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).popUntil((route) => route.isFirst);
+                              },
+                              child: const Text('Back to Menu'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Show loading indicator while waiting
+                    return const Scaffold(
+                      body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 20),
+                            Text('Loading game...'),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                },
+              );
+            }
           });
     });
   }

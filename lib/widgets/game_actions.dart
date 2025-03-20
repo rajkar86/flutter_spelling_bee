@@ -9,41 +9,68 @@ class GameActions extends StatelessWidget {
   // final VoidCallback refresh;
   // final VoidCallback submit;
 
-  static const double kIconSize = 36;
-
   @override
   Widget build(BuildContext context) {
-    //bool isDark = MediaQuery.of(context).platformBrightness == Brightness.light; //TODO change
-
-    Widget buildActionIcon(IconData iconData, String label, Event event) {
-      return Column(
-        children: <Widget>[
-          TextButton(
-            // iconSize: SIZE,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate icon size based on available width
+        final availableWidth = constraints.maxWidth;
+        final iconSize = (availableWidth / 10).clamp(24.0, 36.0);
+        final fontSize = (iconSize / 3).clamp(10.0, 14.0);
+        
+        Widget buildActionIcon(IconData iconData, String label, Event event) {
+          return Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(iconData, size: kIconSize, color: Theme.of(context).iconTheme.color),
-                Text(label, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.all(iconSize * 0.2),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Icon(
+                        iconData, 
+                        size: iconSize,
+                        color: Theme.of(context).iconTheme.color
+                      ),
+                      SizedBox(height: fontSize / 2),
+                      Text(
+                        label, 
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                          fontSize: fontSize,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                    ],
+                  ),
+                  onPressed: () => Provider.of<GameBloc>(context, listen: false)
+                    .eventSink.add(event),
+                ),
               ],
             ),
-            // color: Colors.transparent,
-            // splashColor: Colors.grey,
-            onPressed: () => Provider.of<GameBloc>(context, listen: false).eventSink.add(event),
-          ),
-        ],
-      );
-    }
+          );
+        }
 
-    return Ink(
-      // padding: const EdgeInsets.only(bottom: SIZE*1.5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          buildActionIcon(Icons.clear, "Clear", Event.clear),
-          buildActionIcon(Icons.refresh, "Shuffle", Event.shuffle),
-          buildActionIcon(Icons.check, "Check", Event.check),
-        ],
-      ),
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: availableWidth * 0.02,
+            vertical: 8
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              buildActionIcon(Icons.clear, "Clear", Event.clear),
+              buildActionIcon(Icons.refresh, "Shuffle", Event.shuffle),
+              buildActionIcon(Icons.check, "Check", Event.check),
+            ],
+          ),
+        );
+      }
     );
   }
 }

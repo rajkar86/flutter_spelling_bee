@@ -69,7 +69,15 @@ class MainMenu extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       if (hasSavedGame) {
-                        gameBloc.loadGameSink.add(true);
+                        try {
+                          gameBloc.loadGameSink.add(true);
+                        } catch (e) {
+                          // If there's an error loading the saved game, fall back to a new game
+                          gameBloc.loadGameSink.add(false);
+                        }
+                      } else {
+                        // Start a new game
+                        gameBloc.loadGameSink.add(false);
                       }
                       Navigator.pushNamed(context, '/game');
                     },
